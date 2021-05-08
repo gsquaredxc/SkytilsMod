@@ -18,6 +18,8 @@
 
 package skytils.skytilsmod.features.impl.protectitems.strategy.impl
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import skytils.skytilsmod.Skytils
@@ -36,7 +38,7 @@ class ItemWorthStrategy : ItemProtectStrategy() {
                 return value >= threshold
             }
             ProtectType.HOTBARDROPKEY -> {
-                if (SBInfo.mode != SBInfo.SkyblockIsland.Dungeon.mode) {
+                if (LocationState.serverType != ServerTypes.Dungeon) {
                     return value >= threshold
                 }
             }

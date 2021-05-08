@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.misc
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.block.BlockEndPortalFrame
 import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.EntityOtherPlayerMP
@@ -380,9 +382,7 @@ class MiscFeatures {
 
     class PlacedSummoningEyeDisplay : GuiElement("Placed Summoning Eye Display", FloatPair(50, 60)) {
         override fun render() {
-            val player = mc.thePlayer
-            if (toggled && Utils.inSkyblock && player != null && mc.theWorld != null) {
-                if (SBInfo.mode != SBInfo.SkyblockIsland.TheEnd.mode) return
+            if (toggled && mc.thePlayer != null && mc.theWorld != null && Utils.inSkyblock && LocationState.serverType == ServerTypes.TheEnd) {
                 var invalid = false
                 var placedEyes = 0
                 for (pos in SUMMONING_EYE_FRAMES) {

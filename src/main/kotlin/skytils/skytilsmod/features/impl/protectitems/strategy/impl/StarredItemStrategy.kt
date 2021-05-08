@@ -18,6 +18,8 @@
 
 package skytils.skytilsmod.features.impl.protectitems.strategy.impl
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import skytils.skytilsmod.Skytils
@@ -34,7 +36,7 @@ class StarredItemStrategy : ItemProtectStrategy() {
                 }
             }
             ProtectType.HOTBARDROPKEY -> {
-                if (SBInfo.mode != SBInfo.SkyblockIsland.Dungeon.mode && extraAttr.hasKey("dungeon_item_level")) {
+                if (LocationState.serverType != ServerTypes.Dungeon && extraAttr.hasKey("dungeon_item_level")) {
                     return true
                 }
             }

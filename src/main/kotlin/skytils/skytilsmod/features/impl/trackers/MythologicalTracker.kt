@@ -19,6 +19,8 @@
 package skytils.skytilsmod.features.impl.trackers
 
 import com.google.gson.JsonObject
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.EntityOtherPlayerMP
 import net.minecraft.client.gui.ScaledResolution
@@ -36,12 +38,10 @@ import skytils.skytilsmod.events.PacketEvent
 import skytils.skytilsmod.features.impl.handlers.AuctionData
 import skytils.skytilsmod.utils.ItemRarity
 import skytils.skytilsmod.utils.ItemUtil
-import skytils.skytilsmod.utils.SBInfo
-import skytils.skytilsmod.utils.stripControlCodes
-import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
+import skytils.skytilsmod.utils.stripControlCodes
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
@@ -120,7 +120,7 @@ class MythologicalTracker : PersistentSave(File(File(Skytils.modDir, "trackers")
 
     @SubscribeEvent
     fun onJoinWorld(event: EntityJoinWorldEvent) {
-        if (Utils.inSkyblock && mc.thePlayer != null && Skytils.config.trackMythEvent && event.entity is EntityOtherPlayerMP && System.currentTimeMillis() - lastMinosChamp <= 2500 && event.entity.getDistanceSqToEntity(
+        if (LocationState.isOnSkyblock && mc.thePlayer != null && Skytils.config.trackMythEvent && event.entity is EntityOtherPlayerMP && System.currentTimeMillis() - lastMinosChamp <= 2500 && event.entity.getDistanceSqToEntity(
                 mc.thePlayer
             ) < 5.5 * 5.5
         ) {
@@ -139,7 +139,7 @@ class MythologicalTracker : PersistentSave(File(File(Skytils.modDir, "trackers")
 
     @SubscribeEvent
     fun onReceivePacket(event: PacketEvent.ReceiveEvent) {
-        if (!Utils.inSkyblock || (!Skytils.config.trackMythEvent && !Skytils.config.broadcastMythCreatureDrop)) return
+        if (!LocationState.isOnSkyblock || (!Skytils.config.trackMythEvent && !Skytils.config.broadcastMythCreatureDrop)) return
         when (event.packet) {
             is S02PacketChat -> {
                 if (event.packet.type == 2.toByte() || !Skytils.config.trackMythEvent) return
@@ -284,7 +284,7 @@ class MythologicalTracker : PersistentSave(File(File(Skytils.modDir, "trackers")
 
     class MythologicalTrackerElement : GuiElement("Mythological Tracker", FloatPair(150, 120)) {
         override fun render() {
-            if (toggled && Utils.inSkyblock && SBInfo.mode == SBInfo.SkyblockIsland.Hub.mode) {
+            if (toggled && LocationState.isOnSkyblock && LocationState.serverType == ServerTypes.Hub) {
                 val sr = ScaledResolution(Minecraft.getMinecraft())
                 val leftAlign = actualX < sr.scaledWidth / 2f
                 val alignment =

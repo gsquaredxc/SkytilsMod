@@ -117,6 +117,8 @@ shadowJar {
     exclude "net/java/**"
     exclude "club/sk1er/vigilance/example"
 
+    exclude "com/gsquaredxc/hyskyAPI/**"
+
     exclude "META-INF/proguard/**"
     exclude "META-INF/maven/**"
     exclude "META-INF/versions/**"
@@ -164,6 +166,14 @@ sourceSets {
 
 // asbyth cool process resources
 task moveResources {
+    copy {
+        from '../hyskyAPI/build/libs'
+        into 'libs'
+    }
+    copy {
+        from 'libs'
+        into 'run/mods'
+    }
     doLast {
         ant.move file: "${buildDir}/resources/main",
                 todir: "${buildDir}/classes/java"

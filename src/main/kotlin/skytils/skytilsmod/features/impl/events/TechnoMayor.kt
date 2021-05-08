@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.events
 
 import com.google.common.collect.ImmutableList
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.Entity
@@ -35,9 +37,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.utils.RenderUtil
-import skytils.skytilsmod.utils.SBInfo
-import skytils.skytilsmod.utils.stripControlCodes
 import skytils.skytilsmod.utils.Utils
+import skytils.skytilsmod.utils.stripControlCodes
 import java.awt.Color
 
 class TechnoMayor {
@@ -66,7 +67,7 @@ class TechnoMayor {
     @SubscribeEvent
     fun onWorldRender(event: RenderWorldLastEvent) {
         if (!Utils.inSkyblock) return
-        if (SBInfo.mode != SBInfo.SkyblockIsland.Hub.mode && SBInfo.mode != SBInfo.SkyblockIsland.FarmingIsland.mode) return
+        if (LocationState.serverType != ServerTypes.Hub || LocationState.serverType != ServerTypes.FarmingIsland) return
         if (!Skytils.config.shinyOrbWaypoints) return
 
         val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)

@@ -18,6 +18,8 @@
 
 package skytils.skytilsmod.features.impl.dungeons
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.Items
@@ -45,7 +47,7 @@ class DungeonMap {
     class TrashDungeonMap : GuiElement(name = "Dungeon Map", fp = FloatPair(0, 0)) {
 
         override fun render() {
-            if (!toggled || SBInfo.mode != SBInfo.SkyblockIsland.Dungeon.mode || mc.thePlayer == null || mc.theWorld == null) return
+            if (!toggled || LocationState.serverType != ServerTypes.Dungeon || mc.thePlayer == null || mc.theWorld == null) return
             if (DungeonsFeatures.hasBossSpawned) return
             readMapData()
             if (mapData == null) return

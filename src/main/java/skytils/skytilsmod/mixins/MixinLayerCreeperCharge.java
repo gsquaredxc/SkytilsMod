@@ -18,6 +18,7 @@
 
 package skytils.skytilsmod.mixins;
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates;
 import net.minecraft.client.renderer.entity.layers.LayerCreeperCharge;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.entity.monster.EntityCreeper;
@@ -26,10 +27,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import skytils.skytilsmod.Skytils;
-import skytils.skytilsmod.utils.SBInfo;
-import skytils.skytilsmod.utils.Utils;
 
-import java.util.Objects;
+import static com.gsquaredxc.hyskyAPI.state.location.ServerTypes.DwarvenMines;
 
 @Mixin(LayerCreeperCharge.class)
 public abstract class MixinLayerCreeperCharge implements LayerRenderer<EntityCreeper> {
@@ -38,7 +37,7 @@ public abstract class MixinLayerCreeperCharge implements LayerRenderer<EntityCre
 
     @ModifyArg(method = "doRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/RenderCreeper;bindTexture(Lnet/minecraft/util/ResourceLocation;)V"))
     private ResourceLocation modifyChargedCreeperLayer(ResourceLocation res) {
-        if (Utils.inSkyblock && Skytils.config.moreVisibleGhosts && Objects.equals(SBInfo.INSTANCE.getMode(), "mining_3")) {
+        if (PlayerStates.LocationState.getIsOnSkyblock() && Skytils.config.moreVisibleGhosts && PlayerStates.LocationState.getServerType() == DwarvenMines) {
             res = VISIBLE_CREEPER_ARMOR;
         }
         return res;

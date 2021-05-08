@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.mining
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.block.BlockCarpet
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -100,7 +102,7 @@ class MiningFeatures {
                     "▲"
                 ) && !unformatted.contains("◀") && !unformatted.contains("▼")
             ) return
-            if (SBInfo.mode == SBInfo.SkyblockIsland.DwarvenMines.mode) {
+            if (LocationState.serverType == ServerTypes.DwarvenMines) {
                 puzzlerSolution = BlockPos(181, 195, 135)
                 val msg = unformatted.substring(15).trim { it <= ' ' }
                 val matcher = Pattern.compile("([▶▲◀▼]+)").matcher(unformatted)
@@ -181,7 +183,7 @@ class MiningFeatures {
         val item = event.entityPlayer.heldItem
         val itemId = ItemUtil.getSkyBlockItemID(item)
         if (event.action != PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) {
-            if (SBInfo.mode?.startsWith("dynamic") == true) {
+            if (LocationState.serverType == ServerTypes.PrivateIsland) {
                 if (Skytils.config.noPickaxeAbilityOnPrivateIsland && itemId != null && (itemId.contains("PICKAXE") || itemId.contains(
                         "DRILL"
                     ))
@@ -255,9 +257,8 @@ class MiningFeatures {
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
-        if (!Utils.inSkyblock || event.phase != TickEvent.Phase.START) return
-        if (Skytils.config.skymallReminder && SBInfo.mode == SBInfo.SkyblockIsland.DwarvenMines.mode && SBInfo.time == "12:00am" && GuiManager.title != "§cSKYMALL RESET"
-        ) {
+        if (!LocationState.isOnSkyblock || event.phase != TickEvent.Phase.START) return
+        if (Skytils.config.skymallReminder && LocationState.serverType == ServerTypes.DwarvenMines && SBInfo.time == "12:00am" && GuiManager.title != "§cSKYMALL RESET") {
             createTitle("§cSKYMALL RESET", 20)
         }
     }
@@ -272,7 +273,7 @@ class MiningFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     fun onGetBlockModel(event: RenderBlockInWorldEvent) {
-        if (!Utils.inSkyblock || SBInfo.mode != SBInfo.SkyblockIsland.DwarvenMines.mode || event.state == null) return
+        if (!LocationState.isOnSkyblock || LocationState.serverType != ServerTypes.DwarvenMines || event.state == null) return
         val state = event.state!!
         if (Skytils.config.recolorCarpets && state.block === Blocks.carpet && Utils.equalsOneOf(
                 state.getValue(

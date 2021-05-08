@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.commands
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommand
@@ -71,7 +72,7 @@ object RepartyCommand : CommandBase(), ICommand {
 
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        if (!Utils.isOnHypixel) throw WrongUsageException("You must be on Hypixel to use this command.")
+        if (!LocationState.isOnHypixel) throw WrongUsageException("You must be on Hypixel to use this command.")
         if (args.isNotEmpty() && (args[0].startsWith("fail") || args[0] == "f")) {
             partyThread = Thread {
                 val player = Minecraft.getMinecraft().thePlayer

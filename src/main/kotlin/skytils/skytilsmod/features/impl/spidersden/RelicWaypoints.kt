@@ -20,6 +20,8 @@ package skytils.skytilsmod.features.impl.spidersden
 import com.google.common.collect.ImmutableSet
 import com.google.gson.JsonArray
 import com.google.gson.JsonPrimitive
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S2APacketParticles
@@ -34,8 +36,6 @@ import skytils.skytilsmod.core.PersistentSave
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.events.PacketEvent.SendEvent
 import skytils.skytilsmod.utils.RenderUtil
-import skytils.skytilsmod.utils.SBInfo
-import skytils.skytilsmod.utils.Utils
 import java.awt.Color
 import java.io.File
 import java.io.FileReader
@@ -44,7 +44,7 @@ import java.io.FileWriter
 class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_relics.json")) {
     @SubscribeEvent
     fun onReceivePacket(event: ReceiveEvent) {
-        if (!Utils.inSkyblock) return
+        if (!LocationState.isOnSkyblock) return
         if (event.packet is S2APacketParticles) {
             val packet = event.packet
             val type = packet.particleType
@@ -69,8 +69,7 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
 
     @SubscribeEvent
     fun onSendPacket(event: SendEvent) {
-        if (!Utils.inSkyblock) return
-        if (SBInfo.mode != SBInfo.SkyblockIsland.SpiderDen.mode) return
+        if (!LocationState.isOnSkyblock && LocationState.serverType != ServerTypes.SpiderDen) return
         if (event.packet is C08PacketPlayerBlockPlacement) {
             val packet = event.packet as C08PacketPlayerBlockPlacement?
             if (relicLocations.contains(packet!!.position)) {
@@ -83,8 +82,7 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
 
     @SubscribeEvent
     fun onWorldRender(event: RenderWorldLastEvent) {
-        if (!Utils.inSkyblock) return
-        if (SBInfo.mode != SBInfo.SkyblockIsland.SpiderDen.mode) return
+        if (!LocationState.isOnSkyblock && LocationState.serverType != ServerTypes.SpiderDen) return
         val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
 
         if (Skytils.config.relicWaypoints) {

@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.spidersden
 
 import com.google.common.base.Predicate
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -88,7 +90,7 @@ class SpidersDenFeatures {
             val player = mc.thePlayer
             val world: World? = mc.theWorld
             if (toggled && Utils.inSkyblock && player != null && world != null) {
-                if (SBInfo.mode != SBInfo.SkyblockIsland.SpiderDen.mode) return
+                if (LocationState.serverType != ServerTypes.SpiderDen) return
                 val arachneNames =
                     world.getEntities(EntityArmorStand::class.java, Predicate getEntities@{ entity: EntityArmorStand? ->
                         val name = entity!!.displayName.formattedText

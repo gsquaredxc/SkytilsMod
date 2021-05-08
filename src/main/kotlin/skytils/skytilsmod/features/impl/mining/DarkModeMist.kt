@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.mining
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.block.BlockCarpet
 import net.minecraft.block.BlockStainedGlass
 import net.minecraft.block.state.IBlockState
@@ -34,8 +36,8 @@ class DarkModeMist {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     fun onGetBlockModel(event: RenderBlockInWorldEvent) {
         if (!Utils.inSkyblock || !Skytils.config.darkModeMist) return
-        val state = event.state
-        if (SBInfo.mode == SBInfo.SkyblockIsland.DwarvenMines.mode && event.state != null && event.pos != null) {
+        if (LocationState.serverType == ServerTypes.DwarvenMines && event.state != null && event.pos != null) {
+            val state = event.state
             if ((event.pos as BlockPos).y <= 76) {
                 if ((state as IBlockState).block === Blocks.stained_glass && (state as IBlockState).getValue(
                         BlockStainedGlass.COLOR

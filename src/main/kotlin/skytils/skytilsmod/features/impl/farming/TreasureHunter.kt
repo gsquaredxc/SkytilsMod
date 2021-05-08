@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.farming
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
@@ -69,7 +71,7 @@ class TreasureHunter {
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!Utils.inSkyblock || treasureLocation == null || SBInfo.mode != SBInfo.SkyblockIsland.FarmingIsland.mode) return
+        if (!LocationState.isOnSkyblock || treasureLocation == null || LocationState.serverType != ServerTypes.FarmingIsland) return
         val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
 
         val pos = treasureLocation!!

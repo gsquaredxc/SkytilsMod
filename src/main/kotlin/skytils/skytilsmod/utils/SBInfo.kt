@@ -47,21 +47,12 @@ import java.util.*
 object SBInfo {
 
     private val timePattern = ".+(am|pm)".toRegex()
-    private val JSON_BRACKET_PATTERN = "\\{.+}".toRegex()
 
-    var location = ""
-    var date = ""
     var time = ""
-    var objective: String? = ""
-    var mode: String? = ""
-    var currentTimeDate: Date? = null
 
     @JvmField
     var lastOpenContainerName: String? = null
-    private var lastManualLocRaw: Long = -1
-    private var lastLocRaw: Long = -1
     private var joinedWorld: Long = -1
-    private var locraw: JsonObject? = null
 
     @SubscribeEvent
     fun onGuiOpen(event: GuiOpenEvent) {
@@ -76,48 +67,14 @@ object SBInfo {
 
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load?) {
-        lastLocRaw = -1
-        locraw = null
-        mode = null
         joinedWorld = System.currentTimeMillis()
         lastOpenContainerName = null
     }
 
-    @SubscribeEvent
-    fun onSendChatMessage(event: SendChatMessageEvent) {
-        val msg = event.message
-        if (msg.trim { it <= ' ' }.startsWith("/locraw") || msg.trim { it <= ' ' }.startsWith("/locraw ")) {
-            lastManualLocRaw = System.currentTimeMillis()
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-    fun onChatMessage(event: ClientChatReceivedEvent) {
-        if (event.message.unformattedText.contains("{") && event.message.unformattedText.contains("}")) {
-            val pattern = JSON_BRACKET_PATTERN.find(event.message.unformattedText) ?: return
-            try {
-                val obj = Gson().fromJson(pattern.groupValues[0], JsonObject::class.java)
-                if (obj.has("server")) {
-                    if (System.currentTimeMillis() - lastManualLocRaw > 5000) event.isCanceled = true
-                    if (obj.has("gametype") && obj.has("mode") && obj.has("map")) {
-                        locraw = obj
-                        mode = locraw!!["mode"].asString
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().theWorld == null || !Utils.inSkyblock) return
-        val currentTime = System.currentTimeMillis()
-        if (locraw == null && currentTime - joinedWorld > 1000 && currentTime - lastLocRaw > 15000) {
-            lastLocRaw = System.currentTimeMillis()
-            Skytils.sendMessageQueue.add("/locraw")
-        }
         try {
             val scoreboard = Minecraft.getMinecraft().thePlayer.worldScoreboard
             val sidebarObjective = scoreboard.getObjectiveInDisplaySlot(1) //§707/14/20
@@ -131,46 +88,14 @@ object SBInfo {
                 lines.add(line)
             }
             if (lines.size >= 5) {
-                date = lines[2].stripControlCodes().trim { it <= ' ' }
                 //§74:40am
                 val matcher = timePattern.find(lines[3])
                 if (matcher != null) {
                     time = matcher.groupValues[0].stripControlCodes().trim { it <= ' ' }
-                    try {
-                        val timeSpace = time.replace("am", " am").replace("pm", " pm")
-                        val parseFormat = SimpleDateFormat("hh:mm a")
-                        currentTimeDate = parseFormat.parse(timeSpace)
-                    } catch (e: ParseException) {
-                    }
                 }
-                location =
-                    lines[4].stripControlCodes().replace("[^A-Za-z0-9() ]".toRegex(), "").trim { it <= ' ' }
-            }
-            objective = null
-            var objTextLast = false
-            for (line in lines) {
-                if (objTextLast) {
-                    objective = line
-                }
-                objTextLast = line == "Objective"
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    sealed class SkyblockIsland(val mode: String) {
-        object BlazingFortress : SkyblockIsland("combat_2")
-        object DeepCaverns : SkyblockIsland("mining_2")
-        object Dungeon : SkyblockIsland("dungeon")
-        object DungeonHub : SkyblockIsland("dungeon_hub")
-        object DwarvenMines : SkyblockIsland("mining_3")
-        object FarmingIsland : SkyblockIsland("farming_1")
-        object GoldMine : SkyblockIsland("mining_1")
-        object Hub : SkyblockIsland("hub")
-        object TheEnd : SkyblockIsland("combat_3")
-        object ThePark : SkyblockIsland("foraging_1")
-        object PrivateIsland : SkyblockIsland("dynamic")
-        object SpiderDen : SkyblockIsland("combat_1")
     }
 }

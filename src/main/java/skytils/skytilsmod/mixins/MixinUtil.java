@@ -29,11 +29,13 @@ import skytils.skytilsmod.utils.Utils;
 
 import java.util.concurrent.FutureTask;
 
+import static com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState;
+
 @Mixin(Util.class)
 public abstract class MixinUtil {
     @Inject(method = "runTask", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;fatal(Ljava/lang/String;Ljava/lang/Throwable;)V", remap = false), cancellable = true)
     private static <V> void interceptTaskExceptions(FutureTask<V> task, Logger logger, CallbackInfoReturnable<V> cir) {
-        if (Skytils.config.preventLogSpam && Utils.isOnHypixel()) {
+        if (Skytils.config.preventLogSpam && LocationState.getIsOnHypixel()) {
             cir.setReturnValue(null);
         }
     }

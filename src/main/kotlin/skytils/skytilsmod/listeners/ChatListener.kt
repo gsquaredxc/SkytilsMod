@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.listeners
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ChatComponentText
 import net.minecraft.util.EnumChatFormatting
@@ -34,7 +35,7 @@ import java.util.regex.Pattern
 class ChatListener {
     @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Utils.isOnHypixel || event.type == 2.toByte()) return
+        if (!LocationState.isOnHypixel || event.type == 2.toByte()) return
         val unformatted = stripControlCodes(event.message.unformattedText)
         if (unformatted.startsWith("Your new API key is ")) {
             val apiKey = event.message.siblings[0].chatStyle.chatClickEvent.value
@@ -196,7 +197,7 @@ class ChatListener {
     }
 
     companion object {
-        var mc = Minecraft.getMinecraft()
+        var mc: Minecraft = Minecraft.getMinecraft()
         private var rejoinThread: Thread? = null
         private var lastPartyDisbander = ""
         private val invitePattern = Pattern.compile("(?:(?:\\[.+?] )?(?:\\w+) invited )(?:\\[.+?] )?(\\w+)")
