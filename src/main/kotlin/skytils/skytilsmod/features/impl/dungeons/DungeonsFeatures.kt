@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.features.impl.dungeons
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.block.BlockStainedGlass
 import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.EntityOtherPlayerMP
@@ -232,7 +233,7 @@ class DungeonsFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onDeath(event: LivingDeathEvent) {
-        if (!Utils.inSkyblock) return
+        if (!LocationState.isOnSkyblock) return
         if (event.entityLiving is EntityOtherPlayerMP && terracottaEndTime > 0 && event.entityLiving.name == "Terracotta ") {
             //for some reason this event fires twice for players
             terracottaEndTime -= 1
@@ -241,7 +242,7 @@ class DungeonsFeatures {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!Utils.inSkyblock) return
+        if (!LocationState.isOnSkyblock) return
         val unformatted = event.message.unformattedText.stripControlCodes()
         if (Utils.inDungeons) {
             if (Skytils.config.autoCopyFailToClipboard) {
@@ -351,7 +352,7 @@ class DungeonsFeatures {
     // Spirit leap names
     @SubscribeEvent
     fun onGuiDrawPost(event: DrawScreenEvent.Post) {
-        if (!Utils.inSkyblock) return
+        if (!LocationState.isOnSkyblock) return
         if (event.gui is GuiChest) {
             val inventory = event.gui as GuiChest
             val containerChest = inventory.inventorySlots
@@ -451,7 +452,7 @@ class DungeonsFeatures {
 
     @SubscribeEvent
     fun onDrawSlot(event: GuiContainerEvent.DrawSlotEvent.Pre) {
-        if (!Utils.inSkyblock) return
+        if (!LocationState.isOnSkyblock) return
         val slot = event.slot
         if (event.container is ContainerChest) {
             val cc = event.container
@@ -469,7 +470,7 @@ class DungeonsFeatures {
 
     @SubscribeEvent
     fun onReceivePacket(event: ReceiveEvent) {
-        if (!Utils.inSkyblock) return
+        if (!LocationState.isOnSkyblock) return
         if (event.packet is S45PacketTitle) {
             val packet = event.packet
             if (packet.message != null && mc.thePlayer != null) {

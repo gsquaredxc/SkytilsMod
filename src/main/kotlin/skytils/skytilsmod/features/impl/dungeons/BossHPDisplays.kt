@@ -18,6 +18,7 @@
 package skytils.skytilsmod.features.impl.dungeons
 
 import com.google.common.base.Predicate
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.entity.item.EntityArmorStand
@@ -29,12 +30,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
-import skytils.skytilsmod.utils.stripControlCodes
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
+import skytils.skytilsmod.utils.stripControlCodes
 import java.util.regex.Pattern
 
 class BossHPDisplays {
@@ -150,7 +151,7 @@ class BossHPDisplays {
         override fun render() {
             val player = mc.thePlayer
             val world: World? = mc.theWorld
-            if (canGiantsSpawn && toggled && Utils.inSkyblock && player != null && world != null) {
+            if (canGiantsSpawn && toggled && LocationState.isOnSkyblock && player != null && world != null) {
                 val giantNames =
                     world.getEntities(EntityArmorStand::class.java, Predicate { entity: EntityArmorStand? ->
                         val name = entity!!.displayName.formattedText

@@ -18,6 +18,8 @@
 package skytils.skytilsmod.commands
 
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommand
@@ -77,7 +79,7 @@ object RepartyCommand : CommandBase(), ICommand {
             partyThread = Thread {
                 val player = Minecraft.getMinecraft().thePlayer
                 try {
-                    Skytils.sendMessageQueue.add("/p " + java.lang.String.join(" ", repartyFailList))
+                    SAFE_MESSAGE_SENDER.queueMessage("/p " + java.lang.String.join(" ", repartyFailList))
                     val members = java.lang.String.join(
                         """
     ${EnumChatFormatting.WHITE}
@@ -128,13 +130,13 @@ ${EnumChatFormatting.BLUE}${EnumChatFormatting.STRIKETHROUGH}-------------------
         partyThread = Thread {
             val player = Minecraft.getMinecraft().thePlayer
             try {
-                Skytils.sendMessageQueue.add("/pl")
+                SAFE_MESSAGE_SENDER.queueMessage("/pl")
                 gettingParty = true
                 while (gettingParty) {
                     Thread.sleep(10)
                 }
                 if (party.size == 0) return@Thread
-                Skytils.sendMessageQueue.add("/p disband")
+                SAFE_MESSAGE_SENDER.queueMessage("/p disband")
                 disbanding = true
                 while (disbanding) {
                     Thread.sleep(10)
@@ -157,7 +159,7 @@ ${EnumChatFormatting.BLUE}${EnumChatFormatting.STRIKETHROUGH}-------------------
                 )
                 repartyFailList = ArrayList(party)
                 for (invitee in party) {
-                    Skytils.sendMessageQueue.add("/p $invitee")
+                    SAFE_MESSAGE_SENDER.queueMessage("/p $invitee")
                     inviting = true
                     while (inviting) {
                         Thread.sleep(10)

@@ -18,6 +18,7 @@
 package skytils.skytilsmod.core
 
 import com.google.gson.JsonObject
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -128,7 +129,7 @@ class GuiManager : PersistentSave(File(Skytils.modDir, "guipositions.json")) {
      */
     private fun renderTitles(scaledResolution: ScaledResolution) {
         val mc = Minecraft.getMinecraft()
-        if (mc.theWorld == null || mc.thePlayer == null || !Utils.inSkyblock) {
+        if (mc.theWorld == null || mc.thePlayer == null || !LocationState.isOnSkyblock) {
             return
         }
         val scaledWidth = scaledResolution.scaledWidth

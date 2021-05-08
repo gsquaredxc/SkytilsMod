@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.features.impl.farming
 
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemAxe
@@ -36,8 +37,8 @@ import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.SoundQueue
 import skytils.skytilsmod.events.DamageBlockEvent
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
-import skytils.skytilsmod.utils.stripControlCodes
 import skytils.skytilsmod.utils.Utils
+import skytils.skytilsmod.utils.stripControlCodes
 
 class FarmingFeatures {
     private var lastNotifyBreakTime: Long = 0
@@ -198,7 +199,7 @@ class FarmingFeatures {
         if (!Utils.inSkyblock) return
         if (Mouse.getEventButton() == 0 && event.gui is GuiChat) {
             if (Skytils.config.acceptTrapperTask && !commandSent) {
-                Skytils.sendMessageQueue.add(acceptTrapperCommand)
+                SAFE_MESSAGE_SENDER.queueMessage(acceptTrapperCommand)
                 commandSent = true
             }
         }

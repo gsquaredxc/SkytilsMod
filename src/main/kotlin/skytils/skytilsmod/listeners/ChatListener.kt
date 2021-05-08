@@ -18,6 +18,7 @@
 package skytils.skytilsmod.listeners
 
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ChatComponentText
 import net.minecraft.util.EnumChatFormatting
@@ -29,7 +30,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.commands.RepartyCommand
 import skytils.skytilsmod.mixins.AccessorGuiNewChat
-import skytils.skytilsmod.utils.Utils
 import java.util.regex.Pattern
 
 class ChatListener {
@@ -66,7 +66,7 @@ class ChatListener {
             if (unformatted.contains("You have 60 seconds to accept") && lastPartyDisbander.isNotEmpty() && event.message.siblings.size > 0) {
                 val acceptMessage = event.message.siblings[6].chatStyle
                 if (acceptMessage.chatHoverEvent.value.unformattedText.contains(lastPartyDisbander)) {
-                    Skytils.sendMessageQueue.add("/p accept $lastPartyDisbander")
+                    SAFE_MESSAGE_SENDER.queueMessage("/p accept $lastPartyDisbander")
                     rejoinThread!!.interrupt()
                     lastPartyDisbander = ""
                     return

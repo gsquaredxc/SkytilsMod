@@ -28,8 +28,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.spongepowered.asm.mixin.Final;
@@ -47,12 +45,11 @@ import skytils.skytilsmod.utils.graphics.ScreenRenderer;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
+
+import static com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER;
 
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft {
@@ -90,7 +87,7 @@ public abstract class MixinMinecraft {
             String itemId = ItemUtil.getSkyBlockItemID(extraAttr);
 
             if (Objects.equals(itemId, "BLOCK_ZAPPER")) {
-                Skytils.sendMessageQueue.add("/undozap");
+                SAFE_MESSAGE_SENDER.queueMessage("/undozap");
             }
         }
     }

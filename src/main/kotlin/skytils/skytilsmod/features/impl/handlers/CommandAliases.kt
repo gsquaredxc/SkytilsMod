@@ -19,6 +19,7 @@ package skytils.skytilsmod.features.impl.handlers
 
 import com.google.common.collect.Lists
 import com.google.gson.JsonObject
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.util.ChatComponentText
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -52,7 +53,7 @@ class CommandAliases : PersistentSave(File(Skytils.modDir, "commandaliases.json"
                         mc.ingameGUI.chatGUI.addToSentMessages(msg)
                     }
                     if (ClientCommandHandler.instance.executeCommand(mc.thePlayer, msg) != 0) return
-                    Skytils.sendMessageQueue.add(msg)
+                    SAFE_MESSAGE_SENDER.queueMessage(msg)
                 } catch (ignored: IllegalFormatException) {
                     if (event.addToChat) mc.ingameGUI.chatGUI.addToSentMessages(event.message)
                     mc.thePlayer.addChatMessage(ChatComponentText("§cYou did not specify the correct amount of arguments for this alias!"))

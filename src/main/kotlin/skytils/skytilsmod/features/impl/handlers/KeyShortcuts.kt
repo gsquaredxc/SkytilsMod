@@ -18,6 +18,7 @@
 package skytils.skytilsmod.features.impl.handlers
 
 import com.google.gson.JsonObject
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
@@ -45,7 +46,7 @@ class KeyShortcuts : PersistentSave(File(Skytils.modDir, "keyshortcuts.json")) {
                         message
                     ) != 0
                 ) break
-                Skytils.sendMessageQueue.add(message)
+                SAFE_MESSAGE_SENDER.queueMessage(message)
             }
         }
     }

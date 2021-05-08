@@ -19,6 +19,7 @@ package skytils.skytilsmod.features.impl.dungeons
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.entity.monster.EntityZombie
@@ -67,7 +68,7 @@ class ScoreCalculation {
                         if (!rooms.containsKey(name)) {
                             rooms[name] = secrets
                             if (Skytils.config.scoreCalculationAssist) {
-                                Skytils.sendMessageQueue.add("/pc \$SKYTILS-DUNGEON-SCORE-ROOM$: [$name] ($secrets)")
+                                SAFE_MESSAGE_SENDER.queueMessage("/pc \$SKYTILS-DUNGEON-SCORE-ROOM$: [$name] ($secrets)")
                             }
                         }
                         event.isCanceled = true
@@ -142,7 +143,7 @@ class ScoreCalculation {
                 if (!mimicKilled) {
                     mimicKilled = true
                     if (Skytils.config.scoreCalculationAssist) {
-                        Skytils.sendMessageQueue.add("/pc \$SKYTILS-DUNGEON-SCORE-MIMIC$")
+                        SAFE_MESSAGE_SENDER.queueMessage("/pc \$SKYTILS-DUNGEON-SCORE-MIMIC$")
                     }
                 }
             }

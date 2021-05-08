@@ -18,6 +18,7 @@
 package skytils.skytilsmod.commands
 
 import com.google.common.collect.Lists
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.entity.EntityPlayerSP
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
@@ -66,7 +67,7 @@ object ArmorColorCommand : CommandBase() {
             PersistentSave.markDirty(ArmorColor::class)
             sender.addChatMessage(ChatComponentText("§aCleared all your custom armor colors!"))
         } else if (subcommand == "clear") {
-            if (!Utils.inSkyblock) throw WrongUsageException("You must be in Skyblock to use this command!")
+            if (!LocationState.isOnSkyblock) throw WrongUsageException("You must be in Skyblock to use this command!")
             val item = sender.heldItem
                 ?: throw WrongUsageException("You must hold a leather armor piece to use this command")
             if (item.item !is ItemArmor) throw WrongUsageException("You must hold a leather armor piece to use this command")
@@ -80,7 +81,7 @@ object ArmorColorCommand : CommandBase() {
                 sender.addChatMessage(ChatComponentText("§aCleared the custom color for your " + item.displayName + "§a!"))
             } else sender.addChatMessage(ChatComponentText("§cThat item doesn't have a custom color!"))
         } else if (subcommand == "set") {
-            if (!Utils.inSkyblock) throw WrongUsageException("You must be in Skyblock to use this command!")
+            if (!LocationState.isOnSkyblock) throw WrongUsageException("You must be in Skyblock to use this command!")
             val item = sender.heldItem
                 ?: throw WrongUsageException("You must hold a leather armor piece to use this command")
             if (item.item !is ItemArmor) throw WrongUsageException("You must hold a leather armor piece to use this command")

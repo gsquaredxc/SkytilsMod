@@ -215,10 +215,7 @@ object RenderUtil {
      */
     @JvmStatic
     fun drawOutlinedBoundingBox(aabb: AxisAlignedBB?, color: Color, width: Float, partialTicks: Float) {
-        val render = Minecraft.getMinecraft().renderViewEntity
-        val realX = render.lastTickPosX + (render.posX - render.lastTickPosX) * partialTicks
-        val realY = render.lastTickPosY + (render.posY - render.lastTickPosY) * partialTicks
-        val realZ = render.lastTickPosZ + (render.posZ - render.lastTickPosZ) * partialTicks
+        val (realX, realY, realZ) = getViewerPos(partialTicks)
         GlStateManager.pushMatrix()
         GlStateManager.translate(-realX, -realY, -realZ)
         GlStateManager.disableTexture2D()
@@ -355,9 +352,7 @@ object RenderUtil {
         GlStateManager.alphaFunc(516, 0.1f)
         GlStateManager.pushMatrix()
         val viewer = Minecraft.getMinecraft().renderViewEntity
-        val viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks
-        val viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks
-        val viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks
+        val (viewerX, viewerY, viewerZ) = getViewerPos(viewer, partialTicks)
         var x = loc.x - viewerX
         var y = loc.y - viewerY - viewer.eyeHeight
         var z = loc.z - viewerZ
@@ -391,9 +386,7 @@ object RenderUtil {
         GlStateManager.alphaFunc(516, 0.1f)
         GlStateManager.pushMatrix()
         val viewer = Minecraft.getMinecraft().renderViewEntity
-        val viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks
-        val viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks
-        val viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks
+        val (viewerX, viewerY, viewerZ) = getViewerPos(viewer, partialTicks)
         var x = X - viewerX
         var y = Y - viewerY - viewer.eyeHeight
         var z = Z - viewerZ
@@ -607,6 +600,10 @@ object RenderUtil {
 
     fun getViewerPos(partialTicks: Float): Triple<Double, Double, Double> {
         val viewer = Minecraft.getMinecraft().renderViewEntity
+        return getViewerPos(viewer, partialTicks)
+    }
+
+    fun getViewerPos(viewer: Entity, partialTicks: Float): Triple<Double, Double, Double> {
         val viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks
         val viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks
         val viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks

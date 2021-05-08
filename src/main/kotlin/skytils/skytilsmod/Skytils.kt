@@ -115,9 +115,6 @@ class Skytils {
         var ticks = 0
 
         @JvmField
-        val sendMessageQueue = ArrayDeque<String>()
-
-        @JvmField
         var usingDungeonRooms = false
 
         @JvmField
@@ -271,10 +268,6 @@ class Skytils {
         if (displayScreen != null) {
             mc.displayGuiScreen(displayScreen)
             displayScreen = null
-        }
-
-        if (mc.thePlayer != null && sendMessageQueue.size > 0 && System.currentTimeMillis() - lastChatMessage > 200) {
-            mc.thePlayer.sendChatMessage(sendMessageQueue.removeFirst())
         }
 
         if (ticks % 20 == 0) {

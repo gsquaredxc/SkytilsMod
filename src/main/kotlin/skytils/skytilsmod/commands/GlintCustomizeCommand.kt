@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.commands
 
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.entity.EntityPlayerSP
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
@@ -52,7 +53,7 @@ object GlintCustomizeCommand : CommandBase() {
 
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        if (!Utils.inSkyblock) throw WrongUsageException("You must be in Skyblock to use this command!")
+        if (!LocationState.isOnSkyblock) throw WrongUsageException("You must be in Skyblock to use this command!")
         val player = sender as EntityPlayerSP
         val item = player.heldItem ?: throw WrongUsageException("You need to hold an item that you wish to customize!")
         val itemId = ItemUtil.getSkyBlockItemID(item) ?: throw WrongUsageException("That isn't a valid item!")
