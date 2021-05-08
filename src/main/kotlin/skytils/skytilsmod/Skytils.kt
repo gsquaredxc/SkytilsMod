@@ -125,7 +125,6 @@ class Skytils {
 
         @JvmField
         var jarFile: File? = null
-        private var lastChatMessage = 0L
 
         @JvmField
         var displayScreen: GuiScreen? = null
@@ -281,12 +280,6 @@ class Skytils {
         ticks++
     }
 
-    @SubscribeEvent
-    fun onSendPacket(event: PacketEvent.SendEvent) {
-        if (event.packet is C01PacketChatMessage) {
-            lastChatMessage = System.currentTimeMillis()
-        }
-    }
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent) {

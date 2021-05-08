@@ -118,6 +118,11 @@ shadowJar {
     exclude "club/sk1er/vigilance/example"
 
     exclude "com/gsquaredxc/hyskyAPI/**"
+    exclude "org/reflections/**"
+    exclude "javassist/**"
+
+    exclude "mixins.hyskyapi.refmap.json"
+    exclude "mixins.hyskyapi.json"
 
     exclude "META-INF/proguard/**"
     exclude "META-INF/maven/**"
