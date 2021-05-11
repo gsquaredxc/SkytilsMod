@@ -67,7 +67,7 @@ class TechnoMayor {
     @SubscribeEvent
     fun onWorldRender(event: RenderWorldLastEvent) {
         if (!Utils.inSkyblock) return
-        if (LocationState.serverType != ServerTypes.Hub || LocationState.serverType != ServerTypes.FarmingIsland) return
+        if (LocationState.serverType != ServerTypes.Hub && LocationState.serverType != ServerTypes.FarmingIsland) return
         if (!Skytils.config.shinyOrbWaypoints) return
 
         val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
