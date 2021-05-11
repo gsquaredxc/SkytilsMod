@@ -38,7 +38,7 @@ import java.awt.Color
 
 class TreasureHunter {
 
-    var treasureLocation: BlockPos? = null
+    private var treasureLocation: BlockPos? = null
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
@@ -58,9 +58,7 @@ class TreasureHunter {
             }
             val solution =
                 treasureHunterLocations.getOrDefault(treasureHunterLocations.keys.find { s: String ->
-                    unformatted.contains(
-                        s
-                    )
+                    unformatted.contains(s)
                 }, null)
             if (solution != null) {
                 treasureLocation = solution

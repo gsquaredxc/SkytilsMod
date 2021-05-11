@@ -197,7 +197,7 @@ class ChatListener {
     }
 
     companion object {
-        var mc: Minecraft = Minecraft.getMinecraft()
+        var mc: Minecraft = Minecraft.getMinecraft()!!
         private var rejoinThread: Thread? = null
         private var lastPartyDisbander = ""
         private val invitePattern = Pattern.compile("(?:(?:\\[.+?] )?(?:\\w+) invited )(?:\\[.+?] )?(\\w+)")

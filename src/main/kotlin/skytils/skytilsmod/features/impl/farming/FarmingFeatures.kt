@@ -18,6 +18,7 @@
 package skytils.skytilsmod.features.impl.farming
 
 import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
+import net.minecraft.block.Block
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemAxe
@@ -50,35 +51,6 @@ class FarmingFeatures {
         val heldItem = p.heldItem
         val block = mc.theWorld.getBlockState(event.pos).block
         if (Skytils.config.preventBreakingFarms && heldItem != null) {
-            val farmBlocks = listOf(
-                Blocks.dirt,
-                Blocks.farmland,
-                Blocks.carpet,
-                Blocks.glowstone,
-                Blocks.sea_lantern,
-                Blocks.soul_sand,
-                Blocks.waterlily,
-                Blocks.standing_sign,
-                Blocks.wall_sign,
-                Blocks.wooden_slab,
-                Blocks.double_wooden_slab,
-                Blocks.oak_fence,
-                Blocks.dark_oak_fence,
-                Blocks.birch_fence,
-                Blocks.spruce_fence,
-                Blocks.acacia_fence,
-                Blocks.jungle_fence,
-                Blocks.oak_fence_gate,
-                Blocks.acacia_fence_gate,
-                Blocks.birch_fence_gate,
-                Blocks.jungle_fence_gate,
-                Blocks.spruce_fence_gate,
-                Blocks.dark_oak_fence_gate,
-                Blocks.glass,
-                Blocks.glass_pane,
-                Blocks.stained_glass,
-                Blocks.stained_glass_pane
-            )
             if ((heldItem.item is ItemHoe || heldItem.item is ItemAxe) && farmBlocks.contains(block)) {
                 event.isCanceled = true
                 if (System.currentTimeMillis() - lastNotifyBreakTime > 10000) {
@@ -132,9 +104,7 @@ class FarmingFeatures {
                 return
             }
             val solution = hungerHikerItems.getOrDefault(hungerHikerItems.keys.find { s: String ->
-                unformatted.contains(
-                    s
-                )
+                unformatted.contains(s)
             }, null)
             Thread {
                 try {
@@ -211,5 +181,34 @@ class FarmingFeatures {
         var animalFound = false
         var acceptTrapperCommand = ""
         var commandSent = false
+        val farmBlocks = setOf<Block>(
+            Blocks.dirt,
+            Blocks.farmland,
+            Blocks.carpet,
+            Blocks.glowstone,
+            Blocks.sea_lantern,
+            Blocks.soul_sand,
+            Blocks.waterlily,
+            Blocks.standing_sign,
+            Blocks.wall_sign,
+            Blocks.wooden_slab,
+            Blocks.double_wooden_slab,
+            Blocks.oak_fence,
+            Blocks.dark_oak_fence,
+            Blocks.birch_fence,
+            Blocks.spruce_fence,
+            Blocks.acacia_fence,
+            Blocks.jungle_fence,
+            Blocks.oak_fence_gate,
+            Blocks.acacia_fence_gate,
+            Blocks.birch_fence_gate,
+            Blocks.jungle_fence_gate,
+            Blocks.spruce_fence_gate,
+            Blocks.dark_oak_fence_gate,
+            Blocks.glass,
+            Blocks.glass_pane,
+            Blocks.stained_glass,
+            Blocks.stained_glass_pane
+        )
     }
 }

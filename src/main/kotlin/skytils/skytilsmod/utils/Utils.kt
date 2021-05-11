@@ -19,8 +19,10 @@ package skytils.skytilsmod.utils
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiContainer
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Slot
+import net.minecraft.item.ItemStack
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.util.BlockPos
 import net.minecraftforge.client.event.ClientChatReceivedEvent
@@ -31,11 +33,14 @@ import skytils.skytilsmod.utils.graphics.colors.ColorFactory.web
 import skytils.skytilsmod.utils.graphics.colors.CustomColor
 import skytils.skytilsmod.utils.graphics.colors.RainbowColor.Companion.fromString
 import java.awt.Color
+import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.math.floor
 import kotlin.math.roundToInt
+
 
 object Utils {
     private val mc = Minecraft.getMinecraft()
@@ -48,6 +53,12 @@ object Utils {
 
     @JvmField
     var shouldBypassVolume = false
+
+    @JvmField
+    var lastRenderedSkullStack: ItemStack? = null
+
+    @JvmField
+    var lastRenderedSkullEntity: EntityLivingBase? = null
 
     @JvmStatic
     var random = Random()
@@ -194,5 +205,21 @@ object Utils {
         }
     }
 
-    fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String = this.bufferedReader(charset).use { it.readText() }
+    fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String =
+        this.bufferedReader(charset).use { it.readText() }
+
+    /**
+     * @link https://stackoverflow.com/a/47925649
+     */
+    @Throws(IOException::class)
+    fun getJavaRuntime(): String {
+        val os = System.getProperty("os.name")
+        val java = "${System.getProperty("java.home")}${File.separator}bin${File.separator}${
+            if (os != null && os.lowercase().startsWith("windows")) "java.exe" else "java"
+        }"
+        if (!File(java).isFile) {
+            throw IOException("Unable to find suitable java runtime at $java")
+        }
+        return java
+    }
 }
