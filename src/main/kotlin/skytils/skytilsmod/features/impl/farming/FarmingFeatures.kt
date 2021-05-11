@@ -17,13 +17,14 @@
  */
 package skytils.skytilsmod.features.impl.farming
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
 import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.block.Block
 import net.minecraft.client.gui.GuiChat
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemAxe
 import net.minecraft.item.ItemHoe
-import net.minecraft.network.play.server.S45PacketTitle
 import net.minecraft.util.ChatComponentText
 import net.minecraft.util.EnumChatFormatting
 import net.minecraftforge.client.event.ClientChatReceivedEvent
@@ -37,7 +38,6 @@ import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.SoundQueue
 import skytils.skytilsmod.events.DamageBlockEvent
-import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.stripControlCodes
 
@@ -131,18 +131,15 @@ class FarmingFeatures {
         }
     }
 
-    @SubscribeEvent
-    fun onReceivePacket(event: ReceiveEvent) {
-        if (!Utils.inSkyblock) return
-        if (event.packet is S45PacketTitle) {
-            val packet = event.packet
-            if (packet.message != null) {
-                val unformatted = packet.message.unformattedText.stripControlCodes()
-                if (Skytils.config.hideFarmingRNGTitles && unformatted.contains("DROP!")) {
-                    event.isCanceled = true
-                }
+    @EventListener(id="STFarmingDrop")
+    fun onTitlePacket(event: TitleInEvent): Boolean {
+        if (event.message != null) {
+            val unformatted = event.message.unformattedText.stripControlCodes()
+            if (Skytils.config.hideFarmingRNGTitles && unformatted.contains("DROP!")) {
+                return true
             }
         }
+        return false
     }
 
     @SubscribeEvent
@@ -157,6 +154,7 @@ class FarmingFeatures {
                 }
             }
         }
+        return
     }
 
     @SubscribeEvent

@@ -22,11 +22,11 @@ import club.sk1er.vigilance.gui.SettingsGui
 import com.google.common.collect.Lists
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.gsquaredxc.hyskyAPI.eventListeners.EventRegister
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiIngameMenu
 import net.minecraft.client.gui.GuiScreen
-import net.minecraft.network.play.client.C01PacketChatMessage
 import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.client.event.GuiScreenEvent
@@ -49,7 +49,6 @@ import skytils.skytilsmod.core.Config
 import skytils.skytilsmod.core.GuiManager
 import skytils.skytilsmod.core.SoundQueue
 import skytils.skytilsmod.core.UpdateChecker
-import skytils.skytilsmod.events.PacketEvent
 import skytils.skytilsmod.features.impl.dungeons.*
 import skytils.skytilsmod.features.impl.dungeons.solvers.*
 import skytils.skytilsmod.features.impl.dungeons.solvers.terminals.*
@@ -221,6 +220,8 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(TreasureHunter())
         MinecraftForge.EVENT_BUS.register(TriviaSolver())
         MinecraftForge.EVENT_BUS.register(WaterBoardSolver())
+
+        EventRegister.register(FarmingFeatures());
     }
 
     @Mod.EventHandler
