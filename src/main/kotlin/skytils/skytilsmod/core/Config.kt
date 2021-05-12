@@ -22,7 +22,10 @@ import club.sk1er.vigilance.data.Category
 import club.sk1er.vigilance.data.Property
 import club.sk1er.vigilance.data.PropertyType
 import club.sk1er.vigilance.data.SortingBehavior
+import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
+import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
+import skytils.skytilsmod.utils.ConfigUtil
 import java.awt.Color
 import java.io.File
 
@@ -2131,6 +2134,10 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
             this.transparentHeadLayer /= 100f
             markDirty()
         }
+
+        /*Start listener registration via sk1er shit*/
+        ConfigUtil.connectConfigToListener(this,farmingFeatures, TitleInEvent::class.java,::hideFarmingRNGTitles,hideFarmingRNGTitles,"STFarmingDrop")
+
     }
 
     private object ConfigSorting : SortingBehavior() {

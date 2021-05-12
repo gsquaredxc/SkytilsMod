@@ -135,7 +135,7 @@ class FarmingFeatures {
     fun onTitlePacket(event: TitleInEvent): Boolean {
         if (event.message != null) {
             val unformatted = event.message.unformattedText.stripControlCodes()
-            if (Skytils.config.hideFarmingRNGTitles && unformatted.contains("DROP!")) {
+            if (unformatted.contains("DROP!")) {
                 return true
             }
         }

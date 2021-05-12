@@ -127,6 +127,9 @@ class Skytils {
 
         @JvmField
         var displayScreen: GuiScreen? = null
+
+        @JvmField
+        val farmingFeatures: FarmingFeatures = FarmingFeatures()
     }
 
 
@@ -186,7 +189,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(DungeonsFeatures())
         MinecraftForge.EVENT_BUS.register(DungeonMap())
         MinecraftForge.EVENT_BUS.register(DungeonTimer())
-        MinecraftForge.EVENT_BUS.register(FarmingFeatures())
+        MinecraftForge.EVENT_BUS.register(farmingFeatures)
         MinecraftForge.EVENT_BUS.register(FavoritePets())
         MinecraftForge.EVENT_BUS.register(GlintCustomizer())
         MinecraftForge.EVENT_BUS.register(GriffinBurrows())
@@ -221,7 +224,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(TriviaSolver())
         MinecraftForge.EVENT_BUS.register(WaterBoardSolver())
 
-        EventRegister.register(FarmingFeatures());
+        //EventRegister.register(FarmingFeatures());
     }
 
     @Mod.EventHandler
