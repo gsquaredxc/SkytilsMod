@@ -86,9 +86,11 @@ class ItemFeatures {
                     if (event.slot.hasStack) {
                         val stack = event.slot.stack
                         if (stack.displayName.contains("Health Potion")) event.slot highlight Color(255, 225, 30, 255)
-                        else if (stack.displayName.contains("Mimic Fragment") || stack.displayName.contains("Training Weights") || stack.displayName.contains(
-                                "Journal Entry"
-                            ) || stack.displayName.contains("Defuse Kit")
+                        else if (stack.displayName.containsAny(
+                                "Defuse Kit", "Lever", "Torch",
+                                "Stone", "Tripwire Hook", "Journal Entry",
+                                "Training Weights", "Mimic Fragment"
+                            )
                         ) event.slot highlight Color(255, 50, 150, 255)
                     }
                 }
@@ -345,6 +347,8 @@ class ItemFeatures {
                     if (Skytils.config.showEnchantedBookTier) stackTip =
                         enchantments.getInteger(name.toString()).toString()
                 }
+            } else if (Skytils.config.showDungeonItemLevel && extraAttributes.hasKey("dungeon_item_level")) {
+                stackTip = extraAttributes.getInteger("dungeon_item_level").toString()
             }
         }
         val lore = getItemLore(item)

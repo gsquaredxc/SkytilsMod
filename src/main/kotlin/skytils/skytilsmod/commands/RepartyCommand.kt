@@ -80,11 +80,11 @@ object RepartyCommand : CommandBase(), ICommand {
                 val player = Minecraft.getMinecraft().thePlayer
                 try {
                     SAFE_MESSAGE_SENDER.queueMessage("/p " + java.lang.String.join(" ", repartyFailList))
-                    val members = java.lang.String.join(
-                        """
+                    val members = repartyFailList.joinToString(
+                        separator = """
     ${EnumChatFormatting.WHITE}
     - ${EnumChatFormatting.YELLOW}
-    """.trimIndent(), repartyFailList
+    """.trimIndent(),
                     )
                     player.addChatMessage(
                         ChatComponentText(
@@ -101,11 +101,12 @@ ${EnumChatFormatting.BLUE}${EnumChatFormatting.STRIKETHROUGH}-------------------
                         Thread.sleep(10)
                     }
                     if (repartyFailList.size > 0) {
-                        val repartyFails = java.lang.String.join(
+                        val repartyFails = repartyFailList.joinToString(
+                            separator =
                             """
     
     - ${EnumChatFormatting.RED}
-    """.trimIndent(), repartyFailList
+    """.trimIndent(),
                         )
                         player.addChatMessage(
                             ChatComponentText(
@@ -141,11 +142,12 @@ ${EnumChatFormatting.BLUE}${EnumChatFormatting.STRIKETHROUGH}-------------------
                 while (disbanding) {
                     Thread.sleep(10)
                 }
-                val members = java.lang.String.join(
+                val members = party.joinToString(
+                    separator =
                     """
     ${EnumChatFormatting.WHITE}
     - ${EnumChatFormatting.YELLOW}
-    """.trimIndent(), party
+    """.trimIndent()
                 )
                 player.addChatMessage(
                     ChatComponentText(
@@ -170,11 +172,12 @@ ${EnumChatFormatting.BLUE}${EnumChatFormatting.STRIKETHROUGH}-------------------
                     Thread.sleep(10)
                 }
                 if (repartyFailList.size > 0) {
-                    val repartyFails = java.lang.String.join(
+                    val repartyFails = repartyFailList.joinToString(
+                        separator =
                         """
     
     - ${EnumChatFormatting.RED}
-    """.trimIndent(), repartyFailList
+    """.trimIndent(),
                     )
                     player.addChatMessage(
                         ChatComponentText(

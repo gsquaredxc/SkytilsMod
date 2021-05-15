@@ -67,6 +67,7 @@ import skytils.skytilsmod.features.impl.protectitems.ProtectItems
 import skytils.skytilsmod.features.impl.spidersden.RainTimer
 import skytils.skytilsmod.features.impl.spidersden.RelicWaypoints
 import skytils.skytilsmod.features.impl.spidersden.SpidersDenFeatures
+import skytils.skytilsmod.features.impl.trackers.MayorJerryTracker
 import skytils.skytilsmod.features.impl.trackers.MythologicalTracker
 import skytils.skytilsmod.gui.LocationEditGui
 import skytils.skytilsmod.gui.OptionsGui
@@ -96,7 +97,7 @@ class Skytils {
     companion object {
         const val MODID = "skytils"
         const val MOD_NAME = "Skytils"
-        const val VERSION = "1.0-pre4"
+        const val VERSION = "1.0-pre5"
 
         @JvmField
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -200,6 +201,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(LockOrb())
         MinecraftForge.EVENT_BUS.register(MayorDiana())
         MinecraftForge.EVENT_BUS.register(MayorJerry())
+        MinecraftForge.EVENT_BUS.register(MayorJerryTracker)
         MinecraftForge.EVENT_BUS.register(MiningFeatures())
         MinecraftForge.EVENT_BUS.register(MinionFeatures())
         MinecraftForge.EVENT_BUS.register(MiscFeatures())
@@ -261,7 +263,7 @@ class Skytils {
                 cch.commandSet.add(RepartyCommand)
                 cch.commandMap["rp"] = RepartyCommand
             }
-        }
+        } else throw RuntimeException("Skytils was unable to mixin to the CommandHandler. Please report this on our Discord at discord.gg/skytils.")
     }
 
     @SubscribeEvent

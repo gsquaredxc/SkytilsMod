@@ -148,6 +148,24 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
 
     @Property(
         type = PropertyType.SWITCH,
+        name = "Auto-Reparty on Dungeon Ending",
+        description = "Runs the reparty command when your dungeon ends.",
+        category = "Dungeons",
+        subcategory = "Quality of Life"
+    )
+    var autoRepartyOnDungeonEnd = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Death Counter",
+        description = "Counts the amount of times each member of your team has died in a dungeon.",
+        category = "Dungeons",
+        subcategory = "Miscellaneous"
+    )
+    var dungeonDeathCounter = false
+
+    @Property(
+        type = PropertyType.SWITCH,
         name = "Dungeon Chest Profit",
         description = "Shows the estimated profit for items from chests in dungeons.",
         category = "Dungeons",
@@ -713,6 +731,24 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
 
     @Property(
         type = PropertyType.SWITCH,
+        name = "Hidden Jerry Timer",
+        description = "Displays a timer from when you last discovered a Hidden Jerry.",
+        category = "Events",
+        subcategory = "Mayor Jerry"
+    )
+    var hiddenJerryTimer = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Track Hidden Jerries",
+        description = "Tracks the amount of each type of Jerry that you've found.",
+        category = "Events",
+        subcategory = "Mayor Jerry"
+    )
+    var trackHiddenJerry = false
+
+    @Property(
+        type = PropertyType.SWITCH,
         name = "Show Griffin Burrows",
         description = "Shows the location of burrows during the event.\n§cThis feature requires your API key to be set in general settings.",
         category = "Events",
@@ -1099,6 +1135,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Items"
     )
     var preventPlacingWeapons = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Show Dungeon Item Level",
+        description = "Shows the amount of stars on dungeon items as the stack size.",
+        category = "Miscellaneous",
+        subcategory = "Items"
+    )
+    var showDungeonItemLevel = false
 
     @Property(
         type = PropertyType.SWITCH,
@@ -2117,7 +2162,7 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         registerListener(::darkModeMist) { mc.renderGlobal.loadRenderers() }
         registerListener(::recolorCarpets) { mc.renderGlobal.loadRenderers() }
 
-        this.dataURL = "https://cdn.jsdelivr.net/gh/Skytils/SkytilsMod-Data@main/"
+        this.dataURL = "https://cdn.jsdelivr.net/gh/Skytils/SkytilsMod-Data/"
 
         if (this.largerHeadScale > 2) {
             this.largerHeadScale /= 100
