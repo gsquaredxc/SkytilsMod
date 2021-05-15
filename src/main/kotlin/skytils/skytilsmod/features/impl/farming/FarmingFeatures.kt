@@ -18,6 +18,7 @@
 package skytils.skytilsmod.features.impl.farming
 
 import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
 import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.block.Block
@@ -142,9 +143,9 @@ class FarmingFeatures {
         return false
     }
 
-    @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!Utils.inSkyblock || !Skytils.config.trapperPing || event.phase != TickEvent.Phase.START) return
+    //TODO: create timer system
+    @EventListener(id="STFarmingTrapper")
+    fun onTick(event: TickStartEvent) {
         if (trapperStart > 0) {
             if (System.currentTimeMillis() - trapperStart > 60000 && animalFound) { //1 minute cooldown
                 trapperStart = -1.0
