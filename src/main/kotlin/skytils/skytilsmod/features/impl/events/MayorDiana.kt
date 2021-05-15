@@ -25,7 +25,6 @@ import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderLivingEvent
 import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import skytils.skytilsmod.Skytils
@@ -40,55 +39,55 @@ class MayorDiana {
 
     private val gaiaConstructHits = HashMap<EntityIronGolem, Int>()
 
-
     @SubscribeEvent
-    fun onEvent(event: Event) {
+    fun onPacket(event: PacketEvent.ReceiveEvent) {
         if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
-        when (event) {
-            is TickEvent.ClientTickEvent -> {
-                if (event.phase == TickEvent.Phase.START) for (golem in gaiaConstructHits.keys) {
-                    if (golem.hurtTime == 10) {
-                        gaiaConstructHits[golem] = 0
-                    }
-                }
-            }
-            is PacketEvent.ReceiveEvent -> {
-                if (event.packet is S29PacketSoundEffect) {
-                    if (event.packet.volume == 0f) return
-                    if (event.packet.volume == 0.8f && event.packet.soundName == "random.anvil_land") {
-                        val pos = BlockPos(event.packet.x, event.packet.y, event.packet.z)
-                        for (entity in mc.theWorld.loadedEntityList) {
-                            if (entity is EntityIronGolem && entity.isEntityAlive && entity.getDistanceSq(pos) <= 2 * 2) {
-                                gaiaConstructHits.compute(entity) { _: EntityIronGolem, i: Int? -> if (i == null) 1 else i + 1 }
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-            is RenderLivingEvent.Post<*> -> {
-                if (event.entity is EntityIronGolem) {
-                    val golem = event.entity as EntityIronGolem
-                    if (gaiaConstructHits.containsKey(golem)) {
-                        val percentageHp = golem.health / golem.maxHealth
-                        val neededHits = when {
-                            percentageHp <= (1f / 3f) -> 7
-                            percentageHp <= (2f / 3f) -> 6
-                            else -> 5
-                        }
-                        val hits = gaiaConstructHits.getOrDefault(event.entity, 0)
-                        GlStateManager.disableDepth()
-                        RenderUtil.draw3DString(
-                            Vec3(event.entity.posX, event.entity.posY + 2, event.entity.posZ),
-                            "Hits: $hits / $neededHits",
-                            if (hits < neededHits) Color.RED else Color.GREEN,
-                            (mc as AccessorMinecraft).timer.renderPartialTicks
-                        )
-                        GlStateManager.enableDepth()
+        val packet = event.packet
+        if (packet is S29PacketSoundEffect) {
+            if (packet.volume == 0f) return
+            if (packet.volume == 0.8f && packet.soundName == "random.anvil_land") {
+                val pos = BlockPos(packet.x, packet.y, packet.z)
+                for (entity in mc.theWorld.loadedEntityList) {
+                    if (entity is EntityIronGolem && entity.isEntityAlive && entity.getDistanceSq(pos) <= 2 * 2) {
+                        gaiaConstructHits.compute(entity) { _: EntityIronGolem, i: Int? -> if (i == null) 1 else i + 1 }
+                        break
                     }
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
+        if (event.phase == TickEvent.Phase.START) for (golem in gaiaConstructHits.keys) {
+            if (golem.hurtTime == 10) {
+                gaiaConstructHits[golem] = 0
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onRender(event: RenderLivingEvent.Post<EntityIronGolem>) {
+        if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
+        val golem: EntityIronGolem = event.entity as EntityIronGolem
+        if (gaiaConstructHits.containsKey(golem)) {
+                val percentageHp = golem.health / golem.maxHealth
+                val neededHits = when {
+                    percentageHp <= (1f / 3f) -> 7
+                    percentageHp <= (2f / 3f) -> 6
+                    else -> 5
+                }
+                val hits = gaiaConstructHits.getOrDefault(golem, 0)
+                GlStateManager.disableDepth()
+                RenderUtil.draw3DString(
+                    Vec3(golem.posX, golem.posY + 2, golem.posZ),
+                    "Hits: $hits / $neededHits",
+                    if (hits < neededHits) Color.RED else Color.GREEN,
+                    (mc as AccessorMinecraft).timer.renderPartialTicks
+                )
+                GlStateManager.enableDepth()
+            }
     }
 
     @SubscribeEvent
