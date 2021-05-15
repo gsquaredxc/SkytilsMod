@@ -24,6 +24,7 @@ import club.sk1er.vigilance.data.PropertyType
 import club.sk1er.vigilance.data.SortingBehavior
 import com.gsquaredxc.hyskyAPI.StateRegister.StateRegisters
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
+import skytils.skytilsmod.Skytils.Companion.dungeonFeatures
 import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.utils.ConfigUtil
@@ -2183,7 +2184,7 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
 
         /*Start listener registration via sk1er shit*/
         ConfigUtil.connectConfigToState(this,"onTitlePacket",farmingFeatures, TitleInEvent::class.java,StateRegisters.inSkyblock,::hideFarmingRNGTitles ,hideFarmingRNGTitles,"STFarmingDrop")
-
+        ConfigUtil.connectConfigToState(this,"onTitlePacket",dungeonFeatures, TitleInEvent::class.java,StateRegisters.inDungeons,::hideTerminalCompletionTitles ,hideTerminalCompletionTitles,"STDungeonTerm")
     }
 
     private object ConfigSorting : SortingBehavior() {

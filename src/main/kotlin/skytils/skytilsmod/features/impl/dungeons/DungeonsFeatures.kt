@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.dungeons
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.block.BlockStainedGlass
 import net.minecraft.client.Minecraft
@@ -468,23 +470,25 @@ class DungeonsFeatures {
         }
     }
 
+    @EventListener(id="STDungeonTerm")
+    fun onTitlePacket(event: TitleInEvent): Boolean {
+        if (event.message != null && mc.thePlayer != null) {
+            val unformatted = event.message.unformattedText.stripControlCodes()
+            if (!unformatted.contains(mc.thePlayer.name) && (unformatted.contains(
+                    "activated a terminal!"
+                ) || unformatted.contains("completed a device!") || unformatted.contains("activated a lever!"))
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
     @SubscribeEvent
     fun onReceivePacket(event: ReceiveEvent) {
         if (!LocationState.isOnSkyblock) return
-        if (event.packet is S45PacketTitle) {
-            val packet = event.packet
-            if (packet.message != null && mc.thePlayer != null) {
-                val unformatted = packet.message.unformattedText.stripControlCodes()
-                if (Skytils.config.hideTerminalCompletionTitles && Utils.inDungeons && !unformatted.contains(mc.thePlayer.name) && (unformatted.contains(
-                        "activated a terminal!"
-                    ) || unformatted.contains("completed a device!") || unformatted.contains("activated a lever!"))
-                ) {
-                    event.isCanceled = true
-                }
-            }
-        }
-        if (event.packet is S29PacketSoundEffect) {
-            val packet = event.packet
+        val packet = event.packet
+        if (packet is S29PacketSoundEffect) {
             if (Skytils.config.disableTerracottaSounds && isInTerracottaPhase) {
                 val sound = packet.soundName
                 val pitch = packet.pitch
