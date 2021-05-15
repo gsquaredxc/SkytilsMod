@@ -235,23 +235,12 @@ class ItemFeatures {
     fun onReceivePacket(event: ReceiveEvent) {
         if (!Utils.inSkyblock || mc.theWorld == null) return
         try {
-            if (event.packet is S2APacketParticles) {
-                val packet = event.packet
-                val type = packet.particleType
-                val longDistance = packet.isLongDistance
-                val count = packet.particleCount
-                val speed = packet.particleSpeed
-                val xOffset = packet.xOffset
-                val yOffset = packet.yOffset
-                val zOffset = packet.zOffset
-                val x = packet.xCoordinate
-                val y = packet.yCoordinate
-                val z = packet.zCoordinate
-                val pos = Vec3(x, y, z)
-                if (type == EnumParticleTypes.EXPLOSION_LARGE && Skytils.config.hideImplosionParticles) {
-                    if (longDistance && count == 8 && speed == 8f && xOffset == 0f && yOffset == 0f && zOffset == 0f) {
+            val packet = event.packet
+            if (packet is S2APacketParticles) {
+                if (packet.particleType == EnumParticleTypes.EXPLOSION_LARGE && Skytils.config.hideImplosionParticles) {
+                    if (packet.isLongDistance && packet.particleCount == 8 && packet.particleSpeed == 8f && packet.xOffset == 0f && packet.yOffset == 0f && packet.zOffset == 0f) {
                         for (player in mc.theWorld.playerEntities) {
-                            if (pos.squareDistanceTo(Vec3(player.posX, player.posY, player.posZ)) <= 11 * 11) {
+                            if (Vec3(packet.xCoordinate, packet.yCoordinate, packet.zCoordinate).squareDistanceTo(Vec3(player.posX, player.posY, player.posZ)) <= 11 * 11) {
                                 val item = player.heldItem
                                 if (item != null) {
                                     val itemName = getDisplayName(item).stripControlCodes()
