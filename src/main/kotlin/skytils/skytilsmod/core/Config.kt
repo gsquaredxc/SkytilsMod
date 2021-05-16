@@ -2184,9 +2184,13 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         }
 
         /*Start listener registration via sk1er shit*/
+        //farming
         ConfigUtil.connectConfigToState(this,"onTitlePacket",farmingFeatures, TitleInEvent::class.java,StateRegisters.inSkyblock,::hideFarmingRNGTitles ,hideFarmingRNGTitles,"STFarmingDrop")
-        ConfigUtil.connectConfigToState(this,"onTitlePacket",dungeonFeatures, TitleInEvent::class.java,StateRegisters.inDungeons,::hideTerminalCompletionTitles ,hideTerminalCompletionTitles,"STDungeonTerm")
         ConfigUtil.connectConfigToState(this,"onTick",farmingFeatures, TickStartEvent::class.java,StateRegisters.inSkyblock,::trapperPing ,trapperPing,"STFarmingTrapper")
+        //dungeons
+        ConfigUtil.connectConfigToState(this,"onTitlePacket",dungeonFeatures, TitleInEvent::class.java,StateRegisters.inDungeons,::hideTerminalCompletionTitles ,hideTerminalCompletionTitles,"STDungeonTerm")
+        ConfigUtil.connectConfigToState(this,"onTickSadan",dungeonFeatures, TickStartEvent::class.java,StateRegisters.inDungeons,::showSadanInterest ,showSadanInterest,"STDungeonOnTickSadan")
+        ConfigUtil.connectConfigToState(this,"onTickLivid",dungeonFeatures, TickStartEvent::class.java,StateRegisters.inDungeons,::findCorrectLivid ,findCorrectLivid,"STDungeonOnTickLivid")
     }
 
     private object ConfigSorting : SortingBehavior() {

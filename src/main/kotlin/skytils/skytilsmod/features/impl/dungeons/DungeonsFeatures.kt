@@ -18,6 +18,7 @@
 package skytils.skytilsmod.features.impl.dungeons
 
 import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.block.BlockStainedGlass
@@ -42,7 +43,6 @@ import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
 import net.minecraft.item.Item
 import net.minecraft.network.play.server.S29PacketSoundEffect
-import net.minecraft.network.play.server.S45PacketTitle
 import net.minecraft.potion.Potion
 import net.minecraft.util.BlockPos
 import net.minecraft.util.ChatComponentText
@@ -56,8 +56,6 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
@@ -68,7 +66,6 @@ import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.events.SendChatMessageEvent
 import skytils.skytilsmod.mixins.AccessorEnumDyeColor
 import skytils.skytilsmod.utils.*
-import skytils.skytilsmod.utils.stripControlCodes
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
@@ -119,68 +116,74 @@ class DungeonsFeatures {
         }
     }
 
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
-        if (Utils.inDungeons) {
-            if (dungeonFloor == null) {
-                for (s in ScoreboardUtil.sidebarLines) {
-                    val line = ScoreboardUtil.cleanSB(s)
-                    if (line.contains("The Catacombs (")) {
-                        dungeonFloor = line.substring(line.indexOf("(") + 1, line.indexOf(")"))
-                        break
-                    }
+    //TODO: hyskyAPI approved way
+    @EventListener(id = "STDungeonOnTickSB")
+    fun onTickSB(event: TickStartEvent) {
+        if (dungeonFloor == null) {
+            for (s in ScoreboardUtil.sidebarLines) {
+                val line = ScoreboardUtil.cleanSB(s)
+                if (line.contains("The Catacombs (")) {
+                    dungeonFloor = line.substring(line.indexOf("(") + 1, line.indexOf(")"))
+                    break
                 }
             }
-            if (terracottaEndTime > 0 && Skytils.config.showSadanInterest) {
-                val timeLeft = terracottaEndTime - System.currentTimeMillis()
-                    .toDouble() / 1000f
-                if (timeLeft >= 0) {
-                    BossStatus.healthScale = timeLeft.toFloat() / 105
-                    BossStatus.statusBarTime = 100
-                    BossStatus.bossName = "§r§c§lSadan's Interest: §r§6" + timeLeft.toInt() + "s"
-                    BossStatus.hasColorModifier = false
-                } else {
-                    terracottaEndTime = -2.0
-                }
+        }
+    }
+
+    @EventListener(id = "STDungeonOnTickSadan")
+    fun onTickSadan(event: TickStartEvent) {
+        if (terracottaEndTime > 0) {
+            val timeLeft = terracottaEndTime - System.currentTimeMillis()
+                .toDouble() / 1000f
+            if (timeLeft >= 0) {
+                BossStatus.healthScale = timeLeft.toFloat() / 105
+                BossStatus.statusBarTime = 100
+                BossStatus.bossName = "§r§c§lSadan's Interest: §r§6" + timeLeft.toInt() + "s"
+                BossStatus.hasColorModifier = false
+            } else {
+                terracottaEndTime = -2.0
             }
-            if (Skytils.config.findCorrectLivid && !foundLivid) {
-                if (Utils.equalsOneOf(dungeonFloor, "F5", "M5")) {
-                    when (Skytils.config.lividFinderType) {
-                        1 -> {
-                            val loadedLivids: MutableList<Entity> = ArrayList()
-                            val entities = mc.theWorld.getLoadedEntityList()
-                            for (entity in entities) {
-                                val name = entity.name
-                                if (name.contains("Livid") && name.length > 5 && name[1] == name[5] && !loadedLivids.contains(
-                                        entity
-                                    )
-                                ) {
-                                    loadedLivids.add(entity)
-                                }
-                            }
-                            if (loadedLivids.size > 8) {
-                                livid = loadedLivids[0]
-                                foundLivid = true
+        }
+    }
+
+    @EventListener(id = "STDungeonOnTickLivid")
+    fun onTickLivid(event: TickStartEvent) {
+        if (!foundLivid) {
+            if (Utils.equalsOneOf(dungeonFloor, "F5", "M5")) {
+                when (Skytils.config.lividFinderType) {
+                    1 -> {
+                        val loadedLivids: MutableList<Entity> = ArrayList()
+                        val entities = mc.theWorld.getLoadedEntityList()
+                        for (entity in entities) {
+                            val name = entity.name
+                            if (name.contains("Livid") && name.length > 5 && name[1] == name[5] && !loadedLivids.contains(
+                                    entity
+                                )
+                            ) {
+                                loadedLivids.add(entity)
                             }
                         }
-                        0 -> {
-                            if (hasBossSpawned && mc.thePlayer.isPotionActive(Potion.blindness) && blockLividThread?.isAlive != true) {
-                                blockLividThread = Thread({
-                                    while (mc.thePlayer.isPotionActive(Potion.blindness)) {
-                                        Thread.sleep(10)
+                        if (loadedLivids.size > 8) {
+                            livid = loadedLivids[0]
+                            foundLivid = true
+                        }
+                    }
+                    0 -> {
+                        if (hasBossSpawned && mc.thePlayer.isPotionActive(Potion.blindness) && blockLividThread?.isAlive != true) {
+                            blockLividThread = Thread({
+                                while (mc.thePlayer.isPotionActive(Potion.blindness)) {
+                                    Thread.sleep(10)
+                                }
+                                val state = mc.theWorld.getBlockState(BlockPos(205, 109, 242))
+                                val a = (state.getValue(BlockStainedGlass.COLOR) as AccessorEnumDyeColor).chatColor
+                                for (entity in mc.theWorld.loadedEntityList) {
+                                    if (entity.name.startsWith("$a﴾ $a§lLivid")) {
+                                        livid = entity
+                                        foundLivid = true
                                     }
-                                    val state = mc.theWorld.getBlockState(BlockPos(205, 109, 242))
-                                    val a = (state.getValue(BlockStainedGlass.COLOR) as AccessorEnumDyeColor).chatColor
-                                    for (entity in mc.theWorld.loadedEntityList) {
-                                        if (entity.name.startsWith("$a﴾ $a§lLivid")) {
-                                            livid = entity
-                                            foundLivid = true
-                                        }
-                                    }
-                                }, "Skytils-Block-Livid-Finder")
-                                blockLividThread!!.start()
-                            }
+                                }
+                            }, "Skytils-Block-Livid-Finder")
+                            blockLividThread!!.start()
                         }
                     }
                 }
@@ -470,7 +473,7 @@ class DungeonsFeatures {
         }
     }
 
-    @EventListener(id="STDungeonTerm")
+    @EventListener(id = "STDungeonTerm")
     fun onTitlePacket(event: TitleInEvent): Boolean {
         if (event.message != null && mc.thePlayer != null) {
             val unformatted = event.message.unformattedText.stripControlCodes()

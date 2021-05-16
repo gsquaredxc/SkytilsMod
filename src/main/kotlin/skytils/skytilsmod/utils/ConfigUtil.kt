@@ -21,22 +21,21 @@ object ConfigUtil {
         p: KProperty<Boolean>,
         b: Boolean,
         s: String
-    ){
-        EventRegister.register(
-            o.javaClass.getMethod(m, e),o
-        )
+    ) {
+        EventRegister.register(o.javaClass.getMethod(m, e), o)
         if (b) {
             PublicListeners.listenerHashMap[e]?.deregister(s)
         }
-        v.registerListener(p){
+        v.registerListener(p) {
             if (it) {
                 PublicListeners.listenerHashMap[e]?.reregister(s)
-            }else {
+            } else {
                 PublicListeners.listenerHashMap[e]?.deregister(s)
             }
         }
     }
 
+    //the state knows everything
     @JvmStatic
     fun connectConfigToState(
         v: Vigilant,
@@ -47,23 +46,47 @@ object ConfigUtil {
         p: KProperty<Boolean>,
         b: Boolean,
         s: String
-        ){
+    ) {
         val listener = PublicListeners.listenerHashMap[e]
+        val callback = getCallback(m, o, e, s)
+        if (b) {
+            state.queueCallbackIfNegative(callback, listener!!)
+        }
+        v.registerListener(p) {
+            if (it) {
+                state.queueCallbackIfNegative(callback, listener!!)
+            } else {
+                state.dequeueCallback(s)
+            }
+        }
+    }
+
+    //isnt dystopian i swear
+    @JvmStatic
+    fun registerWithState(
+        m: String,
+        o: Any,
+        e: Class<out Event>,
+        state: StateRegister,
+        s: String
+    ) {
+        val listener = PublicListeners.listenerHashMap[e]
+        val callback = getCallback(m, o, e, s)
+        state.queueCallbackIfNegative(callback, listener!!)
+    }
+
+    @JvmStatic
+    fun getCallback(
+        m: String,
+        o: Any,
+        e: Class<out Event>,
+        s: String
+    ): EventCallback {
         val method = o.javaClass.getMethod(m, e)
         var mh = privateMethodToHandle(method)
         if (!Modifier.isStatic(method.modifiers)) {
             mh = mh.bindTo(o)
         }
-        val callback = EventCallback(mh,s)
-        if (b) {
-            listener?.safeRegister(callback)
-        }
-        v.registerListener(p){
-            if (it) {
-                state.queueCallbackIfNegative(callback, listener!!)
-            }else {
-                state.dequeueCallback(s)
-            }
-        }
+        return EventCallback(mh, s)
     }
 }

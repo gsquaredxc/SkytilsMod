@@ -22,7 +22,9 @@ import club.sk1er.vigilance.gui.SettingsGui
 import com.google.common.collect.Lists
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.gsquaredxc.hyskyAPI.StateRegister.StateRegisters
 import com.gsquaredxc.hyskyAPI.eventListeners.EventRegister
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiIngameMenu
@@ -77,6 +79,7 @@ import skytils.skytilsmod.listeners.ChatListener
 import skytils.skytilsmod.listeners.DungeonListener
 import skytils.skytilsmod.mixins.AccessorCommandHandler
 import skytils.skytilsmod.mixins.AccessorSettingsGui
+import skytils.skytilsmod.utils.ConfigUtil
 import skytils.skytilsmod.utils.SBInfo
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
@@ -229,7 +232,8 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(TriviaSolver())
         MinecraftForge.EVENT_BUS.register(WaterBoardSolver())
 
-        //EventRegister.register(FarmingFeatures());
+        //registering these methods with the state so they dont get out of line
+        ConfigUtil.registerWithState("onTickSB",dungeonFeatures,TickStartEvent::class.java,StateRegisters.inDungeons,"STDungeonOnTickSB")
     }
 
     @Mod.EventHandler
