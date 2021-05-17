@@ -137,6 +137,12 @@ class Skytils {
 
         @JvmField
         val dungeonFeatures: DungeonsFeatures = DungeonsFeatures()
+
+        @JvmField
+        val iceFillSolver: IceFillSolver = IceFillSolver()
+
+        @JvmField
+        val icePathSolver: IcePathSolver = IcePathSolver()
     }
 
 
@@ -200,8 +206,8 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(FavoritePets())
         MinecraftForge.EVENT_BUS.register(GlintCustomizer())
         MinecraftForge.EVENT_BUS.register(GriffinBurrows())
-        MinecraftForge.EVENT_BUS.register(IceFillSolver())
-        MinecraftForge.EVENT_BUS.register(IcePathSolver())
+        MinecraftForge.EVENT_BUS.register(iceFillSolver)
+        MinecraftForge.EVENT_BUS.register(icePathSolver)
         MinecraftForge.EVENT_BUS.register(ItemFeatures())
         MinecraftForge.EVENT_BUS.register(KeyShortcuts())
         MinecraftForge.EVENT_BUS.register(LockOrb())

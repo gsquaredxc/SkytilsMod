@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.dungeons.solvers
 
 import com.google.common.collect.ImmutableList
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.Blocks
@@ -28,23 +30,21 @@ import net.minecraft.world.World
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
 import java.awt.Color
 
 class IceFillSolver {
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Utils.inDungeons || mc.thePlayer == null || mc.theWorld == null) return
-        if (!Skytils.config.iceFillSolver) return
+    @EventListener(id="STOnTickIceFillSolver")
+    fun onTick(event: TickStartEvent) {
         val world: World = mc.theWorld
+        val player = mc.thePlayer
+        if (player == null || world == null) return
         if (ticks % 20 == 0) {
             if (chestPos == null || roomFacing == null) {
                 Thread({
-                    findChest@ for (pos in Utils.getBlocksWithinRangeAtSameY(mc.thePlayer.position, 25, 75)) {
+                    findChest@ for (pos in Utils.getBlocksWithinRangeAtSameY(player.position, 25, 75)) {
                         val block = world.getBlockState(pos)
                         if (block.block === Blocks.chest && world.getBlockState(pos.down()).block === Blocks.stone) {
                             for (direction in EnumFacing.HORIZONTALS) {
@@ -161,50 +161,32 @@ class IceFillSolver {
     fun onWorldRender(event: RenderWorldLastEvent) {
         if (!Skytils.config.iceFillSolver) return
         if (chestPos != null && roomFacing != null) {
-            if (three != null && three!!.paths.size > 0) {
-                for (i in 0 until three!!.paths[0].size - 1) {
-                    val pos = Vec3(three!!.paths[0][i])
-                    val pos2 = Vec3(three!!.paths[0][i + 1])
-                    GlStateManager.disableCull()
-                    RenderUtil.draw3DLine(
-                        pos.addVector(0.5, 0.01, 0.5),
-                        pos2.addVector(0.5, 0.01, 0.5),
-                        5,
-                        Color(255, 0, 0),
-                        event.partialTicks
-                    )
-                    GlStateManager.enableCull()
-                }
+            GlStateManager.disableCull()
+            if (three != null) {
+                lineMagic(three!!, event.partialTicks)
             }
-            if (five != null && five!!.paths.size > 0) {
-                for (i in 0 until five!!.paths[0].size - 1) {
-                    val pos = Vec3(five!!.paths[0][i])
-                    val pos2 = Vec3(five!!.paths[0][i + 1])
-                    GlStateManager.disableCull()
-                    RenderUtil.draw3DLine(
-                        pos.addVector(0.5, 0.01, 0.5),
-                        pos2.addVector(0.5, 0.01, 0.5),
-                        5,
-                        Color(255, 0, 0),
-                        event.partialTicks
-                    )
-                    GlStateManager.enableCull()
-                }
+            if (five != null) {
+                lineMagic(five!!, event.partialTicks)
             }
-            if (seven != null && seven!!.paths.size > 0) {
-                for (i in 0 until seven!!.paths[0].size - 1) {
-                    val pos = Vec3(seven!!.paths[0][i])
-                    val pos2 = Vec3(seven!!.paths[0][i + 1])
-                    GlStateManager.disableCull()
-                    RenderUtil.draw3DLine(
-                        pos.addVector(0.5, 0.01, 0.5),
-                        pos2.addVector(0.5, 0.01, 0.5),
-                        5,
-                        Color(255, 0, 0),
-                        event.partialTicks
-                    )
-                    GlStateManager.enableCull()
-                }
+            if (seven != null) {
+                lineMagic(seven!!, event.partialTicks)
+            }
+            GlStateManager.enableCull()
+        }
+    }
+
+    private fun lineMagic(puzzle: IceFillPuzzle, tick: Float){
+        if (puzzle.paths.size > 0) {
+            for (i in 0 until puzzle.paths[0].size - 1) {
+                val pos = Vec3(puzzle.paths[0][i])
+                val pos2 = Vec3(puzzle.paths[0][i + 1])
+                RenderUtil.draw3DLine(
+                    pos.addVector(0.5, 0.01, 0.5),
+                    pos2.addVector(0.5, 0.01, 0.5),
+                    5,
+                    Color(255, 0, 0),
+                    tick
+                )
             }
         }
     }

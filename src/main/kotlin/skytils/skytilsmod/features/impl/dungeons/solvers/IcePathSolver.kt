@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.dungeons.solvers
 
 import com.google.common.collect.Lists
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.monster.EntitySilverfish
@@ -28,8 +30,6 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
@@ -40,26 +40,27 @@ import java.util.*
 class IcePathSolver {
     private var ticks = 0
 
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Utils.inDungeons || mc.thePlayer == null || mc.theWorld == null) return
-        if (!Skytils.config.icePathSolver) return
-        val silverfish = mc.theWorld.getEntities(
+    @EventListener(id="STOnTickIceFillSolver")
+    fun onTick(event: TickStartEvent) {
+        val world = mc.theWorld
+        val player = mc.thePlayer
+        if (player == null || world == null) return
+        val silverfish = world.getEntities(
             EntitySilverfish::class.java
-        ) { s: EntitySilverfish? -> mc.thePlayer.getDistanceToEntity(s) < 20 }
+        ) { s: EntitySilverfish? -> player.getDistanceToEntity(s) < 20 }
         if (silverfish.size > 0) {
             Companion.silverfish = silverfish[0]
             if (silverfishChestPos == null || roomFacing == null) {
                 if (ticks % 20 == 0) {
                     Thread({
-                        findChest@ for (pos in Utils.getBlocksWithinRangeAtSameY(mc.thePlayer.position, 25, 67)) {
-                            val block = mc.theWorld.getBlockState(pos)
-                            if (block.block === Blocks.chest && mc.theWorld.getBlockState(pos.down()).block === Blocks.packed_ice && mc.theWorld.getBlockState(
+                        findChest@ for (pos in Utils.getBlocksWithinRangeAtSameY(player.position, 25, 67)) {
+                            val block = world.getBlockState(pos)
+                            if (block.block === Blocks.chest && world.getBlockState(pos.down()).block === Blocks.packed_ice && world.getBlockState(
                                     pos.up(2)
                                 ).block === Blocks.hopper
                             ) {
                                 for (direction in EnumFacing.HORIZONTALS) {
-                                    if (mc.theWorld.getBlockState(pos.offset(direction)).block === Blocks.stonebrick) {
+                                    if (world.getBlockState(pos.offset(direction)).block === Blocks.stonebrick) {
                                         silverfishChestPos = pos
                                         roomFacing = direction
                                         println(
@@ -103,12 +104,12 @@ class IcePathSolver {
     fun onWorldRender(event: RenderWorldLastEvent) {
         if (!Skytils.config.icePathSolver) return
         if (silverfishChestPos != null && roomFacing != null && grid != null && silverfish!!.isEntityAlive) {
+            GlStateManager.disableCull()
             for (i in 0 until steps.size - 1) {
                 val point = steps[i]
                 val point2 = steps[i + 1]
                 val pos = getVec3RelativeToGrid(point!!.x, point.y)
                 val pos2 = getVec3RelativeToGrid(point2!!.x, point2.y)
-                GlStateManager.disableCull()
                 RenderUtil.draw3DLine(
                     pos!!.addVector(0.5, 0.5, 0.5),
                     pos2!!.addVector(0.5, 0.5, 0.5),
@@ -116,8 +117,8 @@ class IcePathSolver {
                     Color(255, 0, 0),
                     event.partialTicks
                 )
-                GlStateManager.enableCull()
             }
+            GlStateManager.enableCull()
         }
     }
 

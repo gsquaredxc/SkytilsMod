@@ -25,6 +25,7 @@ import club.sk1er.vigilance.data.SortingBehavior
 import com.gsquaredxc.hyskyAPI.StateRegister.StateRegisters
 import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
+import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.dungeonFeatures
 import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
@@ -2199,6 +2200,11 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         ConfigUtil.connectConfigToState(this,"onTitlePacket",dungeonFeatures, TitleInEvent::class.java,StateRegisters.inDungeons,::hideTerminalCompletionTitles ,hideTerminalCompletionTitles,"STDungeonTerm")
         ConfigUtil.connectConfigToState(this,"onTickSadan",dungeonFeatures, TickStartEvent::class.java,StateRegisters.inDungeons,::showSadanInterest ,showSadanInterest,"STDungeonOnTickSadan")
         ConfigUtil.connectConfigToState(this,"onTickLivid",dungeonFeatures, TickStartEvent::class.java,StateRegisters.inDungeons,::findCorrectLivid ,findCorrectLivid,"STDungeonOnTickLivid")
+        //solvers
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.iceFillSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::iceFillSolver ,iceFillSolver,"STOnTickIceFillSolver")
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.icePathSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::icePathSolver ,icePathSolver,"STOnTickIcePathSolver")
     }
 
     private object ConfigSorting : SortingBehavior() {
