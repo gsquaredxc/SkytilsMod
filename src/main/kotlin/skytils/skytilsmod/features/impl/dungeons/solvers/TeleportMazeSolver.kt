@@ -37,27 +37,29 @@ class TeleportMazeSolver {
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         if (!Skytils.config.teleportMazeSolver || !Utils.inDungeons) return
-        if (mc.thePlayer == null || mc.theWorld == null) return
-        val groundBlock = BlockPos(mc.thePlayer.posX, 69.0, mc.thePlayer.posZ)
-        val state = mc.theWorld.getBlockState(groundBlock)
+        val player = mc.thePlayer
+        val world = mc.theWorld
+        if (player == null || world == null) return
+        val groundBlock = BlockPos(player.posX, 69.0, player.posZ)
+        val state = world.getBlockState(groundBlock)
         if (state.block === Blocks.stone_slab) {
             if (lastTpPos != null) {
                 var inNewCell = false
                 for (routeTrace in BlockPos.getAllInBox(lastTpPos, groundBlock)) {
-                    if (mc.theWorld.getBlockState(routeTrace).block === Blocks.iron_bars) {
+                    if (world.getBlockState(routeTrace).block === Blocks.iron_bars) {
                         inNewCell = true
                         break
                     }
                 }
                 if (inNewCell) {
                     for (pad in Utils.getBlocksWithinRangeAtSameY(lastTpPos!!, 1, 69)) {
-                        if (mc.theWorld.getBlockState(pad).block === Blocks.end_portal_frame) {
+                        if (world.getBlockState(pad).block === Blocks.end_portal_frame) {
                             steppedPads.add(pad)
                             break
                         }
                     }
                     for (pad in Utils.getBlocksWithinRangeAtSameY(groundBlock, 1, 69)) {
-                        if (mc.theWorld.getBlockState(pad).block === Blocks.end_portal_frame) {
+                        if (world.getBlockState(pad).block === Blocks.end_portal_frame) {
                             steppedPads.add(pad)
                             break
                         }
