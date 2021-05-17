@@ -5,7 +5,6 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-18.04
-
     steps:
       - uses: actions/checkout@v2
       - name: Java setup
@@ -22,6 +21,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build
+        env:
+          GITHUB_ACTOR: ${{ secrets.RGITHUB_ACTOR }}
+          GITHUB_TOKEN: ${{ secrets.RGITHUB_TOKEN }}
         run: chmod +x gradlew; ./gradlew setupCiWorkspace && ./gradlew build
       - name: Upload build artifacts
         uses: actions/upload-artifact@v1
