@@ -84,17 +84,17 @@ class SelectAllColorSolver {
         if (!Utils.inDungeons) return
         val chest = event.container
         if (chest is ContainerChest) {
-            val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
-            if (chestName.startsWith("Select all the")) {
+            if ((chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }).startsWith("Select all the")) {
                 event.isCanceled = true
-                if (Skytils.config.blockIncorrectTerminalClicks && event.slot != null) {
+                val slot = event.slot
+                if (Skytils.config.blockIncorrectTerminalClicks && slot != null) {
                     if (shouldClick.size > 0) {
-                        if (shouldClick.none { slotNum: Int -> slotNum == event.slot.slotNumber }) {
+                        if (shouldClick.none { slotNum: Int -> slotNum == slot.slotNumber }) {
                             return
                         }
                     }
                 }
-                mc.playerController.windowClick(event.container.windowId, event.slotId, 2, 0, mc.thePlayer)
+                mc.playerController.windowClick(chest.windowId, event.slotId, 2, 0, mc.thePlayer)
             }
         }
     }
@@ -106,8 +106,7 @@ class SelectAllColorSolver {
         val chest = event.container
         if (chest is ContainerChest) {
             val slot = event.slot
-            val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
-            if (chestName.startsWith("Select all the")) {
+            if ((chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }).startsWith("Select all the")) {
                 if (shouldClick.size > 0 && !shouldClick.contains(slot.slotNumber) && slot.inventory !== mc.thePlayer.inventory) {
                     event.isCanceled = true
                 }
@@ -120,12 +119,8 @@ class SelectAllColorSolver {
         if (!Utils.inDungeons) return
         if (!Skytils.config.selectAllColorTerminalSolver) return
         if (event.toolTip == null) return
-        val player = mc.thePlayer
         if (mc.currentScreen is GuiChest) {
-            val chest = player.openContainer as ContainerChest
-            val inv = chest.lowerChestInventory
-            val chestName = inv.displayName.unformattedText
-            if (chestName.startsWith("Select all the")) {
+            if ((mc.thePlayer.openContainer as ContainerChest).lowerChestInventory.displayName.unformattedText.startsWith("Select all the")) {
                 event.toolTip.clear()
             }
         }

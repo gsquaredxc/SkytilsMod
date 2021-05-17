@@ -2210,6 +2210,8 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         //f7 solvers
         ConfigUtil.connectConfigToState(this,"onTick",
             Skytils.selectAllColorSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::selectAllColorTerminalSolver ,selectAllColorTerminalSolver,"STOnTickColorSolver")
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.startsWithSequenceSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::startsWithSequenceTerminalSolver ,startsWithSequenceTerminalSolver,"STOnTickSeqSolver")
     }
 
     private object ConfigSorting : SortingBehavior() {

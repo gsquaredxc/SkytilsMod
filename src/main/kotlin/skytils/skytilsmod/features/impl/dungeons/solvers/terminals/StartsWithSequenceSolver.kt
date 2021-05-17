@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.dungeons.solvers.terminals
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.ContainerChest
@@ -33,28 +35,28 @@ import skytils.skytilsmod.utils.Utils
 import java.util.regex.Pattern
 
 class StartsWithSequenceSolver {
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Utils.inDungeons || mc.thePlayer == null || mc.theWorld == null) return
-        if (!Skytils.config.startsWithSequenceTerminalSolver) return
-        if (mc.currentScreen is GuiChest) {
-            val chest = mc.thePlayer.openContainer as ContainerChest
-            val invSlots = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots
-            val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
-            val nameMatcher = titlePattern.matcher(chestName)
+    @EventListener(id="STOnTickSeqSolver")
+    fun onTick(event: TickStartEvent) {
+        val player = mc.thePlayer
+        if (player == null || mc.theWorld == null) return
+        val currentScreen = mc.currentScreen
+        if (currentScreen is GuiChest) {
+            val chest = player.openContainer as ContainerChest
+            val nameMatcher = titlePattern.matcher(chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' })
             if (nameMatcher.find()) {
                 val sequence = nameMatcher.group(1)
                 if (sequence != sequenceNeeded) {
                     sequenceNeeded = sequence
                     shouldClick.clear()
                 } else if (shouldClick.size == 0) {
-                    for (slot in invSlots) {
-                        if (slot.inventory === mc.thePlayer.inventory || !slot.hasStack) continue
+                    for (slot in currentScreen.inventorySlots.inventorySlots) {
+                        if (slot.inventory === player.inventory || !slot.hasStack) continue
                         val item = slot.stack ?: continue
                         if (item.isItemEnchanted) continue
-                        if (slot.slotNumber < 9 || slot.slotNumber > 44 || slot.slotNumber % 9 == 0 || slot.slotNumber % 9 == 8) continue
+                        val slotNumber = slot.slotNumber
+                        if (slotNumber < 9 || slotNumber > 44 || slotNumber % 9 == 0 || slotNumber % 9 == 8) continue
                         if (item.displayName.stripControlCodes().startsWith(sequenceNeeded!!)) {
-                            shouldClick.add(slot.slotNumber)
+                            shouldClick.add(slotNumber)
                         }
                     }
                 } else {
@@ -74,19 +76,20 @@ class StartsWithSequenceSolver {
     fun onSlotClick(event: SlotClickEvent) {
         if (!Utils.inDungeons) return
         if (!Skytils.config.startsWithSequenceTerminalSolver) return
-        if (event.container is ContainerChest) {
-            val chest = event.container
+        val chest = event.container
+        if (chest is ContainerChest) {
             val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
             if (chestName.startsWith("What starts with:")) {
                 event.isCanceled = true
-                if (Skytils.config.blockIncorrectTerminalClicks && event.slot != null) {
+                val slot = event.slot
+                if (Skytils.config.blockIncorrectTerminalClicks && slot != null) {
                     if (shouldClick.size > 0) {
-                        if (shouldClick.none { slotNum: Int -> slotNum == event.slot.slotNumber }) {
+                        if (shouldClick.none { slotNum: Int -> slotNum == slot.slotNumber }) {
                             return
                         }
                     }
                 }
-                mc.playerController.windowClick(event.container.windowId, event.slotId, 2, 0, mc.thePlayer)
+                mc.playerController.windowClick(chest.windowId, event.slotId, 2, 0, mc.thePlayer)
             }
         }
     }
@@ -95,9 +98,9 @@ class StartsWithSequenceSolver {
     fun onDrawSlot(event: GuiContainerEvent.DrawSlotEvent.Pre) {
         if (!Utils.inDungeons) return
         if (!Skytils.config.startsWithSequenceTerminalSolver) return
-        if (event.container is ContainerChest) {
+        val chest = event.container
+        if (chest is ContainerChest) {
             val slot = event.slot
-            val chest = event.container
             val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
             if (chestName.startsWith("What starts with:")) {
                 if (shouldClick.size > 0 && !shouldClick.contains(slot.slotNumber) && slot.inventory !== mc.thePlayer.inventory) {
@@ -112,7 +115,6 @@ class StartsWithSequenceSolver {
         if (!Utils.inDungeons) return
         if (!Skytils.config.startsWithSequenceTerminalSolver) return
         if (event.toolTip == null) return
-        val mc = Minecraft.getMinecraft()
         val player = mc.thePlayer
         if (mc.currentScreen is GuiChest) {
             val chest = player.openContainer as ContainerChest

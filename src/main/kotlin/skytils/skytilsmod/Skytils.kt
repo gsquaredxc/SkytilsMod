@@ -149,6 +149,9 @@ class Skytils {
 
         @JvmField
         val selectAllColorSolver: SelectAllColorSolver = SelectAllColorSolver()
+
+        @JvmField
+        val startsWithSequenceSolver: StartsWithSequenceSolver = StartsWithSequenceSolver()
     }
 
 
@@ -234,7 +237,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(SimonSaysSolver())
         MinecraftForge.EVENT_BUS.register(SlayerFeatures())
         MinecraftForge.EVENT_BUS.register(SpidersDenFeatures())
-        MinecraftForge.EVENT_BUS.register(StartsWithSequenceSolver())
+        MinecraftForge.EVENT_BUS.register(startsWithSequenceSolver)
         MinecraftForge.EVENT_BUS.register(TankDisplayStuff())
         MinecraftForge.EVENT_BUS.register(TechnoMayor())
         MinecraftForge.EVENT_BUS.register(TeleportMazeSolver())
