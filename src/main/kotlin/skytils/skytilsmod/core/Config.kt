@@ -2205,6 +2205,11 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
             Skytils.iceFillSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::iceFillSolver ,iceFillSolver,"STOnTickIceFillSolver")
         ConfigUtil.connectConfigToState(this,"onTick",
             Skytils.icePathSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::icePathSolver ,icePathSolver,"STOnTickIcePathSolver")
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.boulderSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::boulderSolver ,boulderSolver,"STOnTickBoulderSolver")
+        //f7 solvers
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.selectAllColorSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::selectAllColorTerminalSolver ,selectAllColorTerminalSolver,"STOnTickColorSolver")
     }
 
     private object ConfigSorting : SortingBehavior() {

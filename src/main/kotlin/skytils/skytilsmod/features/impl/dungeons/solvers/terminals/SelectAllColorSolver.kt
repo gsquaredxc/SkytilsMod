@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.dungeons.solvers.terminals
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.ContainerChest
@@ -32,13 +34,14 @@ import skytils.skytilsmod.events.GuiContainerEvent.SlotClickEvent
 import skytils.skytilsmod.utils.Utils
 
 class SelectAllColorSolver {
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !Utils.inDungeons || mc.thePlayer == null || mc.theWorld == null) return
-        if (!Skytils.config.selectAllColorTerminalSolver) return
-        if (mc.currentScreen is GuiChest) {
-            val chest = mc.thePlayer.openContainer as ContainerChest
-            val invSlots = (mc.currentScreen as GuiChest).inventorySlots.inventorySlots
+    @EventListener(id="STOnTickColorSolver")
+    fun onTick(event: TickStartEvent) {
+        val player = mc.thePlayer
+        if (player == null || mc.theWorld == null) return
+        val currentScreen = mc.currentScreen
+        if (currentScreen is GuiChest) {
+            val chest = player.openContainer as ContainerChest
+            val invSlots = currentScreen.inventorySlots.inventorySlots
             val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
             if (chestName.startsWith("Select all the")) {
                 var promptColor: String? = null
@@ -54,12 +57,13 @@ class SelectAllColorSolver {
                     shouldClick.clear()
                 } else if (shouldClick.size == 0) {
                     for (slot in invSlots) {
-                        if (slot.inventory === mc.thePlayer.inventory || !slot.hasStack) continue
+                        if (slot.inventory === player.inventory || !slot.hasStack) continue
                         val item = slot.stack ?: continue
                         if (item.isItemEnchanted) continue
-                        if (slot.slotNumber < 9 || slot.slotNumber > 44 || slot.slotNumber % 9 == 0 || slot.slotNumber % 9 == 8) continue
+                        val slotNumber = slot.slotNumber
+                        if (slotNumber < 9 || slotNumber > 44 || slotNumber % 9 == 0 || slotNumber % 9 == 8) continue
                         if (item.unlocalizedName.contains(colorNeeded!!)) {
-                            shouldClick.add(slot.slotNumber)
+                            shouldClick.add(slotNumber)
                         }
                     }
                 } else {
@@ -78,8 +82,8 @@ class SelectAllColorSolver {
     @SubscribeEvent
     fun onSlotClick(event: SlotClickEvent) {
         if (!Utils.inDungeons) return
-        if (event.container is ContainerChest) {
-            val chest = event.container
+        val chest = event.container
+        if (chest is ContainerChest) {
             val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
             if (chestName.startsWith("Select all the")) {
                 event.isCanceled = true
@@ -99,9 +103,9 @@ class SelectAllColorSolver {
     fun onDrawSlot(event: GuiContainerEvent.DrawSlotEvent.Pre) {
         if (!Utils.inDungeons) return
         if (!Skytils.config.selectAllColorTerminalSolver) return
-        if (event.container is ContainerChest) {
+        val chest = event.container
+        if (chest is ContainerChest) {
             val slot = event.slot
-            val chest = event.container
             val chestName = chest.lowerChestInventory.displayName.unformattedText.trim { it <= ' ' }
             if (chestName.startsWith("Select all the")) {
                 if (shouldClick.size > 0 && !shouldClick.contains(slot.slotNumber) && slot.inventory !== mc.thePlayer.inventory) {
@@ -116,7 +120,6 @@ class SelectAllColorSolver {
         if (!Utils.inDungeons) return
         if (!Skytils.config.selectAllColorTerminalSolver) return
         if (event.toolTip == null) return
-        val mc = Minecraft.getMinecraft()
         val player = mc.thePlayer
         if (mc.currentScreen is GuiChest) {
             val chest = player.openContainer as ContainerChest

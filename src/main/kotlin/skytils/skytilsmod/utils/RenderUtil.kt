@@ -605,9 +605,12 @@ object RenderUtil {
     }
 
     fun getViewerPos(viewer: Entity, partialTicks: Float): Triple<Double, Double, Double> {
-        val viewerX = viewer.lastTickPosX + (viewer.posX - viewer.lastTickPosX) * partialTicks
-        val viewerY = viewer.lastTickPosY + (viewer.posY - viewer.lastTickPosY) * partialTicks
-        val viewerZ = viewer.lastTickPosZ + (viewer.posZ - viewer.lastTickPosZ) * partialTicks
+        val lastX = viewer.lastTickPosX
+        val lastY = viewer.lastTickPosY
+        val lastZ = viewer.lastTickPosZ
+        val viewerX = lastX + (viewer.posX - lastX) * partialTicks
+        val viewerY = lastY + (viewer.posY - lastY) * partialTicks
+        val viewerZ = lastZ + (viewer.posZ - lastZ) * partialTicks
         return Triple(viewerX, viewerY, viewerZ)
     }
 

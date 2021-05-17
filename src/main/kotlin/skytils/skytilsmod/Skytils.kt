@@ -143,6 +143,12 @@ class Skytils {
 
         @JvmField
         val icePathSolver: IcePathSolver = IcePathSolver()
+
+        @JvmField
+        val boulderSolver: BoulderSolver = BoulderSolver()
+
+        @JvmField
+        val selectAllColorSolver: SelectAllColorSolver = SelectAllColorSolver()
     }
 
 
@@ -192,7 +198,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(BlazeSolver())
         MinecraftForge.EVENT_BUS.register(BlockAbility())
         MinecraftForge.EVENT_BUS.register(BossHPDisplays())
-        MinecraftForge.EVENT_BUS.register(BoulderSolver())
+        MinecraftForge.EVENT_BUS.register(boulderSolver)
         MinecraftForge.EVENT_BUS.register(ChestProfit())
         MinecraftForge.EVENT_BUS.register(ClickInOrderSolver())
         MinecraftForge.EVENT_BUS.register(CreeperSolver())
@@ -223,7 +229,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(RainTimer())
         MinecraftForge.EVENT_BUS.register(RelicWaypoints())
         MinecraftForge.EVENT_BUS.register(ScoreCalculation())
-        MinecraftForge.EVENT_BUS.register(SelectAllColorSolver())
+        MinecraftForge.EVENT_BUS.register(selectAllColorSolver)
         MinecraftForge.EVENT_BUS.register(ShootTheTargetSolver())
         MinecraftForge.EVENT_BUS.register(SimonSaysSolver())
         MinecraftForge.EVENT_BUS.register(SlayerFeatures())

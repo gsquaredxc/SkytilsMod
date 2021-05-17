@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.dungeons.solvers
 
 import com.google.common.collect.Lists
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.Blocks
@@ -37,9 +39,8 @@ import java.awt.Color
 import kotlin.math.floor
 
 class BoulderSolver {
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START) return
+    @EventListener(id="STOnTickBoulderSolver")
+    fun onTick(event: TickStartEvent) {
         ticks++
         if (ticks % 20 == 0) {
             ticks = 0
@@ -51,9 +52,9 @@ class BoulderSolver {
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (!Skytils.config.boulderSolver) return
         if (boulderChest == null) return
-        val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
         if (roomVariant >= 0) {
             val steps = variantSteps[roomVariant]
+            GlStateManager.disableCull()
             for (step in steps) {
                 if (grid[step.x][step.y] != BoulderState.EMPTY) {
                     val downRow = boulderFacing!!.opposite
@@ -66,20 +67,20 @@ class BoulderSolver {
                         Direction.LEFT -> boulderFacing!!.rotateYCCW()
                         Direction.RIGHT -> boulderFacing!!.rotateY()
                     }
-                    val buttonPos = boulderPos.offset(actualDirection!!.opposite, 2).down()
+                    val buttonPos = boulderPos.offset(actualDirection!!.opposite, 2)
+                    val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
                     val x = buttonPos.x - viewerX
-                    val y = buttonPos.y - viewerY
+                    val y = buttonPos.y - viewerY - 1
                     val z = buttonPos.z - viewerZ
-                    GlStateManager.disableCull()
                     RenderUtil.drawFilledBoundingBox(
                         AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1),
                         Color(255, 0, 0, 255),
                         0.7f
                     )
-                    GlStateManager.enableCull()
                     break
                 }
             }
+            GlStateManager.enableCull()
         }
     }
 
@@ -119,7 +120,6 @@ class BoulderSolver {
         private var ticks = 0
         private var workerThread: Thread? = null
         fun update() {
-            if (!Skytils.config.boulderSolver) return
             val player = mc.thePlayer
             val world: World? = mc.theWorld
             if (Utils.inDungeons && world != null && player != null && roomVariant != -2 && (workerThread == null || !workerThread!!.isAlive || workerThread!!.isInterrupted)) {
