@@ -100,7 +100,7 @@ class Skytils {
     companion object {
         const val MODID = "skytils"
         const val MOD_NAME = "Skytils"
-        const val VERSION = "1.0-pre6"
+        const val VERSION = "1.0-pre7"
 
         @JvmField
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -172,7 +172,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(ChatListener())
         MinecraftForge.EVENT_BUS.register(DungeonListener)
         MinecraftForge.EVENT_BUS.register(guiManager)
-        MinecraftForge.EVENT_BUS.register(MayorInfo())
+        MinecraftForge.EVENT_BUS.register(MayorInfo)
         MinecraftForge.EVENT_BUS.register(SBInfo)
         MinecraftForge.EVENT_BUS.register(SoundQueue)
         MinecraftForge.EVENT_BUS.register(UpdateChecker)

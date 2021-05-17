@@ -42,7 +42,6 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "API",
         hidden = true
     )
-
     var dataURL = "https://cdn.jsdelivr.net/gh/Skytils/SkytilsMod-Data@main/"
 
     @Property(
@@ -724,6 +723,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
 
     @Property(
         type = PropertyType.SWITCH,
+        name = "Display Jerry Perks",
+        description = "Displays the perks for Jerry.\nYou must visit Jerry in order for the display to function correctly.",
+        category = "Events",
+        subcategory = "Mayor Jerry"
+    )
+    var displayJerryPerks = false
+
+    @Property(
+        type = PropertyType.SWITCH,
         name = "Hidden Jerry Alert",
         description = "Displays an alert when you find a hidden Jerry.",
         category = "Events",
@@ -1132,7 +1140,7 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
     @Property(
         type = PropertyType.SWITCH,
         name = "Prevent Placing Weapons",
-        description = "Stops the game from trying to place the Flower of Truth and the Spirit Sceptre.",
+        description = "Stops the game from trying to place the Flower of Truth, Spirit Sceptre, and Weird Tuba items.",
         category = "Miscellaneous",
         subcategory = "Items"
     )

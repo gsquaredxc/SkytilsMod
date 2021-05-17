@@ -19,7 +19,6 @@
 package skytils.skytilsmod.mixins;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelSkeletonHead;
 import net.minecraft.client.renderer.GlStateManager;
@@ -37,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import skytils.skytilsmod.features.impl.handlers.GlintCustomizer;
 import skytils.skytilsmod.utils.ItemUtil;
+import skytils.skytilsmod.utils.RenderUtil;
 import skytils.skytilsmod.utils.Utils;
 import skytils.skytilsmod.utils.graphics.colors.CustomColor;
 
@@ -58,17 +58,21 @@ public abstract class MixinTileEntitySkullRenderer extends TileEntitySpecialRend
         if (Utils.lastRenderedSkullStack != null && Utils.lastRenderedSkullEntity != null) {
             ModelBase model = type == 2 || type == 3 ? this.humanoidHead : this.skeletonHead;
             String itemId = ItemUtil.getSkyBlockItemID(Utils.lastRenderedSkullStack);
+            GlStateManager.pushMatrix();
+            GlStateManager.pushAttrib();
             if (GlintCustomizer.glintColors.containsKey(itemId)) {
                 CustomColor color = GlintCustomizer.glintColors.get(itemId);
                 renderGlint(Utils.lastRenderedSkullEntity, model, rotation, color);
             } else renderGlint(Utils.lastRenderedSkullEntity, model, rotation,null);
+            GlStateManager.popAttrib();
+            GlStateManager.popMatrix();
             Utils.lastRenderedSkullStack = null;
             Utils.lastRenderedSkullEntity = null;
         }
     }
 
     private void renderGlint(EntityLivingBase entity, ModelBase model, float rotation, CustomColor color) {
-        float partialTicks = ((AccessorMinecraft) mc).getTimer().renderPartialTicks;
+        float partialTicks = RenderUtil.INSTANCE.getPartialTicks();
         float f = (float)entity.ticksExisted + partialTicks;
         mc.getTextureManager().bindTexture(ENCHANTED_ITEM_GLINT_RES);
         GlStateManager.enableBlend();
