@@ -21,7 +21,6 @@ package skytils.skytilsmod.listeners
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.util.ChatComponentText
-import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import skytils.skytilsmod.Skytils
@@ -48,71 +47,69 @@ object DungeonListener {
     private var ticks = 0
 
     @SubscribeEvent
-    fun onEvent(event: Event) {
-        if (!Utils.inDungeons) return
-        if (!Skytils.config.boxedTanks && !Skytils.config.showTankRadius && !Skytils.config.boxedProtectedTeammates && !Skytils.config.dungeonDeathCounter && !Skytils.config.autoRepartyOnDungeonEnd && !Skytils.config.spiritLeapNames) return
-        when (event) {
-            is PacketEvent.ReceiveEvent -> {
-                if (event.packet is S02PacketChat) {
-                    if (event.packet.chatComponent.formattedText.startsWith("§r§aDungeon starts in 1 second.")) {
-                        team.clear()
-                        deads.clear()
-                        TickTask(40) {
-                            getMembers()
-                        }
-                    } else if (event.packet.chatComponent.unformattedText.stripControlCodes()
-                            .trim() == "> EXTRA STATS <"
-                    ) {
-                        if (Skytils.config.dungeonDeathCounter) {
-                            TickTask(6) {
-                                mc.ingameGUI.chatGUI.printChatMessage(
-                                    ChatComponentText("§c☠ §lDeaths:§r ${team.sumOf { it.deaths }}\n${
-                                        team.sortedByDescending { it.deaths }.filter { it.deaths > 0 }.joinToString(
-                                            separator = "\n"
-                                        ) {
-                                            "  §c☠ ${it.playerName}:§r ${it.deaths}"
-                                        }
-                                    }"
-                                    )
-                                )
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START) return
+        if (ticks % 2 == 0) {
+            ticks = 0
+            if (DungeonTimer.scoreShownAt == -1L) {
+                val tabEntries = TabListUtils.tabEntries
+                for (teammate in team) {
+                    if (tabEntries.size <= teammate.tabEntryIndex) continue
+                    val entry = tabEntries[teammate.tabEntryIndex].getText()
+                    if (!entry.contains(teammate.playerName)) continue
+                    teammate.player = mc.theWorld.playerEntities.find {
+                        it.name == teammate.playerName && it.uniqueID.version() == 4
+                    }
+                    teammate.dead = entry.contains("§r§f(§r§cDEAD§r§f)§r")
+                    if (teammate.dead) {
+                        if (deads.add(teammate)) {
+                            teammate.deaths++
+                            if (Skytils.config.dungeonDeathCounter) {
+                                TickTask(1) {
+                                    mc.ingameGUI.chatGUI.printChatMessage(ChatComponentText("§bThis is §e${teammate.playerName}§b's §e${teammate.deaths.addSuffix()}§b death out of §e${team.sumOf { it.deaths }}§b total deaths."))
+                                }
                             }
                         }
-                        if (Skytils.config.autoRepartyOnDungeonEnd) {
-                            RepartyCommand.processCommand(mc.thePlayer, emptyArray())
-                        }
+                    } else {
+                        deads.remove(teammate)
                     }
                 }
             }
-            is TickEvent.ClientTickEvent -> {
-                if (event.phase != TickEvent.Phase.START) return
-                if (ticks % 2 == 0) {
-                    ticks = 0
-                    if (DungeonTimer.scoreShownAt == -1L) {
-                        val tabEntries = TabListUtils.tabEntries
-                        for (teammate in team) {
-                            if (tabEntries.size <= teammate.tabEntryIndex) continue
-                            val entry = tabEntries[teammate.tabEntryIndex].getText()
-                            if (!entry.contains(teammate.playerName)) continue
-                            teammate.player = mc.theWorld.playerEntities.find {
-                                it.name == teammate.playerName && it.uniqueID.version() == 4
-                            }
-                            teammate.dead = entry.contains("§r§f(§r§cDEAD§r§f)§r")
-                            if (teammate.dead) {
-                                if (deads.add(teammate)) {
-                                    teammate.deaths++
-                                    if (Skytils.config.dungeonDeathCounter) {
-                                        TickTask(1) {
-                                            mc.ingameGUI.chatGUI.printChatMessage(ChatComponentText("§bThis is §e${teammate.playerName}§b's §e${teammate.deaths.addSuffix()}§b death out of §e${team.sumOf { it.deaths }}§b total deaths."))
-                                        }
-                                    }
+        }
+        ticks++
+    }
+
+    @SubscribeEvent
+    fun onRecieve(event: PacketEvent.ReceiveEvent) {
+        if (!Utils.inDungeons) return
+        if (!Skytils.config.boxedTanks && !Skytils.config.showTankRadius && !Skytils.config.boxedProtectedTeammates && !Skytils.config.dungeonDeathCounter && !Skytils.config.autoRepartyOnDungeonEnd && !Skytils.config.spiritLeapNames) return
+        if (event.packet is S02PacketChat) {
+            if (event.packet.chatComponent.formattedText.startsWith("§r§aDungeon starts in 1 second.")) {
+                team.clear()
+                deads.clear()
+                TickTask(40) {
+                    getMembers()
+                }
+            } else if (event.packet.chatComponent.unformattedText.stripControlCodes()
+                    .trim() == "> EXTRA STATS <"
+            ) {
+                if (Skytils.config.dungeonDeathCounter) {
+                    TickTask(6) {
+                        mc.ingameGUI.chatGUI.printChatMessage(
+                            ChatComponentText("§c☠ §lDeaths:§r ${team.sumOf { it.deaths }}\n${
+                                team.sortedByDescending { it.deaths }.filter { it.deaths > 0 }.joinToString(
+                                    separator = "\n"
+                                ) {
+                                    "  §c☠ ${it.playerName}:§r ${it.deaths}"
                                 }
-                            } else {
-                                deads.remove(teammate)
-                            }
-                        }
+                            }"
+                            )
+                        )
                     }
                 }
-                ticks++
+                if (Skytils.config.autoRepartyOnDungeonEnd) {
+                    RepartyCommand.processCommand(mc.thePlayer, emptyArray())
+                }
             }
         }
     }

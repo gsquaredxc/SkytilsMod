@@ -27,7 +27,6 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import skytils.skytilsmod.Skytils
@@ -61,85 +60,85 @@ class AlignmentTaskSolver {
     private var ticks = 0
 
     @SubscribeEvent
-    fun onEvent(event: Event) {
-        when (event) {
-            is TickEvent.ClientTickEvent -> {
-                if (mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
-                if (!Skytils.config.alignmentTerminalSolver || !Utils.inDungeons || DungeonsFeatures.dungeonFloor != "F7" || DungeonTimer.phase2ClearTime == -1L || DungeonTimer.phase3ClearTime != -1L) return
-                if (ticks % 20 == 0) {
-                    if (mc.thePlayer.getDistanceSqToCenter(topLeft) <= 25 * 25) {
-                        if (grid.size < 25) {
-                            val frames = mc.theWorld.getEntities(EntityItemFrame::class.java) {
-                                it != null && box.contains(it.position) && it.displayedItem != null && Utils.equalsOneOf(
-                                    it.displayedItem.item,
-                                    Items.arrow,
-                                    Item.getItemFromBlock(Blocks.wool)
-                                )
-                            }
-                            if (frames.isNotEmpty()) {
-                                for ((i, pos) in box.withIndex()) {
-                                    val row = i % 5
-                                    val column = floor((i / 5f).toDouble()).toInt()
-                                    val coords = Point(row, column)
-                                    val frame = frames.find { it.position == pos }
-                                    if (frame != null) {
-                                        val type = with(frame.displayedItem) {
-                                            when (item) {
-                                                Items.arrow -> SpaceType.PATH
-                                                Item.getItemFromBlock(Blocks.wool) -> {
-                                                    when (itemDamage) {
-                                                        5 -> SpaceType.STARTER
-                                                        14 -> SpaceType.END
-                                                        else -> SpaceType.PATH
-                                                    }
-                                                }
-                                                else -> SpaceType.EMPTY
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
+        if (!Skytils.config.alignmentTerminalSolver || !Utils.inDungeons || DungeonsFeatures.dungeonFloor != "F7" || DungeonTimer.phase2ClearTime == -1L || DungeonTimer.phase3ClearTime != -1L) return
+        if (ticks % 20 == 0) {
+            if (mc.thePlayer.getDistanceSqToCenter(topLeft) <= 25 * 25) {
+                if (grid.size < 25) {
+                    val frames = mc.theWorld.getEntities(EntityItemFrame::class.java) {
+                        it != null && box.contains(it.position) && it.displayedItem != null && Utils.equalsOneOf(
+                            it.displayedItem.item,
+                            Items.arrow,
+                            Item.getItemFromBlock(Blocks.wool)
+                        )
+                    }
+                    if (frames.isNotEmpty()) {
+                        for ((i, pos) in box.withIndex()) {
+                            val row = i % 5
+                            val column = floor((i / 5f).toDouble()).toInt()
+                            val coords = Point(row, column)
+                            val frame = frames.find { it.position == pos }
+                            if (frame != null) {
+                                val type = with(frame.displayedItem) {
+                                    when (item) {
+                                        Items.arrow -> SpaceType.PATH
+                                        Item.getItemFromBlock(Blocks.wool) -> {
+                                            when (itemDamage) {
+                                                5 -> SpaceType.STARTER
+                                                14 -> SpaceType.END
+                                                else -> SpaceType.PATH
                                             }
                                         }
-                                        grid.add(MazeSpace(frame, type, coords))
-                                    } else {
-                                        grid.add(MazeSpace(type = SpaceType.EMPTY, coords = coords))
+                                        else -> SpaceType.EMPTY
                                     }
                                 }
-                            }
-                        } else if (directionSet.isEmpty()) {
-                            val startPositions = grid.filter { it.type == SpaceType.STARTER }
-                            val endPositions = grid.filter { it.type == SpaceType.END }
-                            val layout = layout
-                            for (start in startPositions) {
-                                for (endPosition in endPositions) {
-                                    val pointMap = solve(layout, start.coords, endPosition.coords)
-                                    if (pointMap.size == 0) continue
-                                    val moveSet = convertPointMapToMoves(pointMap)
-                                    for (move in moveSet) {
-                                        directionSet[move.point] = move.directionNum
-                                    }
-                                }
+                                grid.add(MazeSpace(frame, type, coords))
+                            } else {
+                                grid.add(MazeSpace(type = SpaceType.EMPTY, coords = coords))
                             }
                         }
                     }
-                    ticks = 0
-                }
-                ticks++
-            }
-            is WorldEvent.Load -> {
-                grid.clear()
-                directionSet.clear()
-            }
-            is RenderWorldLastEvent -> {
-                for (space in grid) {
-                    if (space.type != SpaceType.PATH || space.frame == null) continue
-                    var neededClicks = directionSet.getOrElse(space.coords) { 0 } - space.frame.rotation
-                    if (neededClicks == 0) continue
-                    if (neededClicks < 0) neededClicks += 8
-                    RenderUtil.draw3DString(
-                        getVec3RelativeToGrid(space.coords.x, space.coords.y).addVector(0.5, 0.5, 0.5),
-                        neededClicks.toString(),
-                        Color.RED,
-                        event.partialTicks
-                    )
+                } else if (directionSet.isEmpty()) {
+                    val startPositions = grid.filter { it.type == SpaceType.STARTER }
+                    val endPositions = grid.filter { it.type == SpaceType.END }
+                    val layout = layout
+                    for (start in startPositions) {
+                        for (endPosition in endPositions) {
+                            val pointMap = solve(layout, start.coords, endPosition.coords)
+                            if (pointMap.size == 0) continue
+                            val moveSet = convertPointMapToMoves(pointMap)
+                            for (move in moveSet) {
+                                directionSet[move.point] = move.directionNum
+                            }
+                        }
+                    }
                 }
             }
+            ticks = 0
+        }
+        ticks++
+    }
+
+    @SubscribeEvent
+    fun onWorldLoad(event: WorldEvent.Load) {
+        grid.clear()
+        directionSet.clear()
+    }
+
+    @SubscribeEvent
+    fun onRenderLast(event: RenderWorldLastEvent) {
+        for (space in grid) {
+            if (space.type != SpaceType.PATH || space.frame == null) continue
+            var neededClicks = directionSet.getOrElse(space.coords) { 0 } - space.frame.rotation
+            if (neededClicks == 0) continue
+            if (neededClicks < 0) neededClicks += 8
+            RenderUtil.draw3DString(
+                getVec3RelativeToGrid(space.coords.x, space.coords.y).addVector(0.5, 0.5, 0.5),
+                neededClicks.toString(),
+                Color.RED,
+                event.partialTicks
+            )
         }
     }
 
