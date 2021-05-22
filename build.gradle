@@ -17,7 +17,7 @@
  */
 
 plugins {
-    id "net.minecraftforge.gradle.forge" version "8f14deb"
+    id "net.minecraftforge.gradle.forge" version "b13624"
     id "com.github.johnrengelman.shadow" version "6.1.0"
     id "org.jetbrains.kotlin.jvm" version "1.5.0"
     id "org.spongepowered.mixin" version "d5f9873d60"
@@ -25,7 +25,7 @@ plugins {
 
 ext.kotlin_version = "1.5.0"
 
-version = "1.0-pre7"
+version = "1.0-pre9"
 group = "skytils.skytilsmod"
 archivesBaseName = "Skytils"
 
@@ -82,7 +82,7 @@ dependencies {
 
     annotationProcessor("org.spongepowered:mixin:0.7.11-SNAPSHOT")
 
-    implementation("club.sk1er:Vigilance:104-10809-SNAPSHOT") {
+    implementation("club.sk1er:Vigilance:105-10809-SNAPSHOT") {
         exclude module: "kotlin-reflect"
         exclude module: "kotlin-stdlib-jdk8"
     }
@@ -92,7 +92,7 @@ dependencies {
 
     compile "com.gsquaredxc.hyskyAPI:hyskyapi:1.0.0.4"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_version-RC"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_version"
 }
 
 jar {
@@ -195,7 +195,7 @@ task moveResources {
     }
     doLast {
         ant.move file: "${buildDir}/resources/main",
-                todir: "${buildDir}/classes/java"
+                todir: "${buildDir}/classes/kotlin"
     }
 }
 

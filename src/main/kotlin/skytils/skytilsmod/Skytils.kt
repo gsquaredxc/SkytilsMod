@@ -86,6 +86,7 @@ import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import java.awt.Desktop
 import java.io.File
 import java.net.URL
+import java.util.concurrent.Executors
 
 
 @Mod(
@@ -100,7 +101,7 @@ class Skytils {
     companion object {
         const val MODID = "skytils"
         const val MOD_NAME = "Skytils"
-        const val VERSION = "1.0-pre7"
+        const val VERSION = "1.0-pre9"
 
         @JvmField
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -152,6 +153,9 @@ class Skytils {
 
         @JvmField
         val startsWithSequenceSolver: StartsWithSequenceSolver = StartsWithSequenceSolver()
+
+        @JvmField
+        val threadPool = Executors.newFixedThreadPool(10)
     }
 
 
@@ -243,6 +247,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(TeleportMazeSolver())
         MinecraftForge.EVENT_BUS.register(TerminalFeatures())
         MinecraftForge.EVENT_BUS.register(ThreeWeirdosSolver())
+        MinecraftForge.EVENT_BUS.register(TicTacToeSolver())
         MinecraftForge.EVENT_BUS.register(TreasureHunter())
         MinecraftForge.EVENT_BUS.register(TriviaSolver())
         MinecraftForge.EVENT_BUS.register(WaterBoardSolver())
@@ -286,6 +291,8 @@ class Skytils {
                 cch.commandMap["rp"] = RepartyCommand
             }
         } else throw RuntimeException("Skytils was unable to mixin to the CommandHandler. Please report this on our Discord at discord.gg/skytils.")
+
+        MayorInfo.fetchMayorData()
     }
 
     @SubscribeEvent

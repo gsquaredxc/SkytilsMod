@@ -28,6 +28,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import skytils.skytilsmod.Skytils
+import skytils.skytilsmod.listeners.DungeonListener
 import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
 import java.awt.Color
@@ -36,13 +37,13 @@ class TeleportMazeSolver {
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
-        if (!Skytils.config.teleportMazeSolver || !Utils.inDungeons) return
+        if (!Skytils.config.teleportMazeSolver || !Utils.inDungeons || !DungeonListener.missingPuzzles.contains("Teleport Maze")) return
         val player = mc.thePlayer
         val world = mc.theWorld
-        if (player == null || world == null) return
+        if (player == null || world == null || mc.thePlayer.posY < 68) return
         val groundBlock = BlockPos(player.posX, 69.0, player.posZ)
         val state = world.getBlockState(groundBlock)
-        if (state.block === Blocks.stone_slab) {
+        if (state.block == Blocks.stone_slab) {
             if (lastTpPos != null) {
                 var inNewCell = false
                 for (routeTrace in BlockPos.getAllInBox(lastTpPos, groundBlock)) {

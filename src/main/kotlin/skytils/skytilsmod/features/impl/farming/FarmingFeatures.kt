@@ -38,7 +38,9 @@ import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.SoundQueue
+import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.events.DamageBlockEvent
+import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.stripControlCodes
 
@@ -103,12 +105,7 @@ class FarmingFeatures {
             val solution = hungerHikerItems.getOrDefault(hungerHikerItems.keys.find { s: String ->
                 unformatted.contains(s)
             }, null)
-            Thread {
-                try {
-                    Thread.sleep(200)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
+            TickTask(4) {
                 if (solution != null) {
                     mc.thePlayer.addChatMessage(ChatComponentText(EnumChatFormatting.GREEN.toString() + "The Hiker needs: " + EnumChatFormatting.DARK_GREEN + EnumChatFormatting.BOLD + solution + EnumChatFormatting.GREEN + "!"))
                 } else {
@@ -124,7 +121,7 @@ class FarmingFeatures {
                         )
                     }
                 }
-            }.start()
+            }
         }
     }
 
@@ -142,7 +139,7 @@ class FarmingFeatures {
     //TODO: create timer system
     @EventListener(id="STFarmingTrapper")
     fun onTick(event: TickStartEvent) {
-        if (trapperStart > 0) {
+        if (trapperStart > 0 && mc.thePlayer != null) {
             if (System.currentTimeMillis() - trapperStart > 60000 && animalFound) { //1 minute cooldown
                 trapperStart = -1.0
                 mc.thePlayer.addChatMessage(ChatComponentText("§dSkytils: Trapper cooldown has now expired!"))
@@ -163,7 +160,7 @@ class FarmingFeatures {
     fun onMouseInputPost(event: GuiScreenEvent.MouseInputEvent.Post) {
         if (!Utils.inSkyblock) return
         if (Mouse.getEventButton() == 0 && event.gui is GuiChat) {
-            if (Skytils.config.acceptTrapperTask && acceptTrapperCommand.isBlank()) {
+            if (Skytils.config.acceptTrapperTask && acceptTrapperCommand.isNotBlank()) {
                 SAFE_MESSAGE_SENDER.queueMessage(acceptTrapperCommand)
                 acceptTrapperCommand = ""
             }

@@ -17,6 +17,8 @@
  */
 package skytils.skytilsmod.features.impl.dungeons
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import com.gsquaredxc.hyskyAPI.annotations.EventListener
 import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
@@ -55,6 +57,7 @@ import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
+import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.BossBarEvent
@@ -72,7 +75,7 @@ import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import java.awt.Color
 import java.util.regex.Pattern
 
-class DungeonsFeatures {
+class DungeonFeatures {
     companion object {
         private val mc = Minecraft.getMinecraft()
         private val playerPattern = Pattern.compile("(?:\\[.+?] )?(\\w+)")
@@ -108,7 +111,7 @@ class DungeonsFeatures {
         private var rerollClicks = 0
         private var foundLivid = false
         private var livid: Entity? = null
-        private var blockLividThread: Thread? = Thread()
+        private var active = false
 
         init {
             LividGuiElement()
@@ -168,8 +171,8 @@ class DungeonsFeatures {
                         }
                     }
                     0 -> {
-                        if (hasBossSpawned && mc.thePlayer.isPotionActive(Potion.blindness) && blockLividThread?.isAlive != true) {
-                            blockLividThread = Thread({
+                        if (hasBossSpawned && mc.thePlayer.isPotionActive(Potion.blindness) && !active) {
+                            Skytils.threadPool.submit {
                                 while (mc.thePlayer.isPotionActive(Potion.blindness)) {
                                     Thread.sleep(10)
                                 }
@@ -179,10 +182,11 @@ class DungeonsFeatures {
                                     if (entity.name.startsWith("$a﴾ $a§lLivid")) {
                                         livid = entity
                                         foundLivid = true
+                                        break
                                     }
                                 }
-                            }, "Skytils-Block-Livid-Finder")
-                            blockLividThread!!.start()
+                            }
+                            active = false
                         }
                     }
                 }
@@ -367,7 +371,7 @@ class DungeonsFeatures {
                 for (slot in invSlots) {
                     if (slot.inventory == mc.thePlayer.inventory) continue
                     if (!slot.hasStack || slot.stack.item != Items.skull) continue
-                     val item = slot.stack
+                    val item = slot.stack
                     people++
 
                     //slot is 16x16
@@ -484,7 +488,7 @@ class DungeonsFeatures {
     }
 
     @SubscribeEvent
-    fun onGuiOpen(event: GuiOpenEvent?) {
+    fun onGuiOpen(event: GuiOpenEvent) {
         rerollClicks = 0
     }
 

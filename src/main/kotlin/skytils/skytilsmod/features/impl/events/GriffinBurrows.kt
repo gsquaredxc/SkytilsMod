@@ -50,36 +50,36 @@ import kotlin.math.roundToInt
 
 class GriffinBurrows {
     companion object {
-        var burrows = ArrayList<Burrow>()
-        var dugBurrows = ArrayList<BlockPos>()
+        var burrows = arrayListOf<Burrow>()
+        var dugBurrows = arrayListOf<BlockPos>()
         var lastDugBurrow: BlockPos? = null
-        var particleBurrows = ArrayList<ParticleBurrow>()
+        var particleBurrows = arrayListOf<ParticleBurrow>()
         var lastDugParticleBurrow: BlockPos? = null
         var burrowRefreshTimer = StopWatch()
         var shouldRefreshBurrows = false
         private val mc = Minecraft.getMinecraft()
         fun refreshBurrows() {
-            Thread {
+            Skytils.threadPool.submit {
                 println("Finding burrows")
                 val uuid = mc.thePlayer.gameProfile.id.toString().replace("[\\-]".toRegex(), "")
                 val apiKey = Skytils.config.apiKey
                 if (apiKey.isEmpty()) {
                     mc.thePlayer.addChatMessage(ChatComponentText("§c§lYour API key is required in order to use the burrow feature. §cPlease set it with /api new or /st setkey <key>"))
                     Skytils.config.showGriffinBurrows = false
-                    return@Thread
+                    return@submit
                 }
-                val latestProfile = APIUtil.getLatestProfileID(uuid, apiKey) ?: return@Thread
+                val latestProfile = APIUtil.getLatestProfileID(uuid, apiKey) ?: return@submit
                 val profileResponse =
                     APIUtil.getJSONResponse("https://api.hypixel.net/skyblock/profile?profile=$latestProfile&key=$apiKey")
                 if (!profileResponse["success"].asBoolean) {
                     val reason = profileResponse["cause"].asString
                     mc.thePlayer.addChatMessage(ChatComponentText(EnumChatFormatting.RED.toString() + "Failed getting burrows with reason: " + reason))
-                    return@Thread
+                    return@submit
                 }
                 val playerObject = profileResponse["profile"].asJsonObject["members"].asJsonObject[uuid].asJsonObject
                 if (!playerObject.has("griffin")) {
                     mc.thePlayer.addChatMessage(ChatComponentText(EnumChatFormatting.RED.toString() + "Failed getting burrows with reason: No griffin object."))
-                    return@Thread
+                    return@submit
                 }
                 val burrowArray = playerObject["griffin"].asJsonObject["burrows"].asJsonArray
                 val receivedBurrows = ArrayList<Burrow>()
@@ -111,7 +111,7 @@ class GriffinBurrows {
                         ChatComponentText("§cSkytils was unable to load fresh burrows. Please wait for the API refresh or switch hubs.")
                     )
                 } else mc.thePlayer.addChatMessage(ChatComponentText(EnumChatFormatting.GREEN.toString() + "Skytils loaded " + EnumChatFormatting.DARK_GREEN + receivedBurrows.size + EnumChatFormatting.GREEN + " burrows!"))
-            }.start()
+            }
         }
 
         init {
@@ -208,12 +208,14 @@ class GriffinBurrows {
         if (Skytils.config.showGriffinBurrows) {
             if (burrows.isNotEmpty()) {
                 for (burrow in burrows.toTypedArray()) {
-                    burrow.drawWaypoint(event.partialTicks)
+                    if (burrow != null) {
+                        burrow.drawWaypoint(event.partialTicks)
+                    }
                 }
             }
             if (Skytils.config.particleBurrows && particleBurrows.isNotEmpty()) {
                 for (pb in particleBurrows.toTypedArray()) {
-                    if (pb.hasEnchant && pb.hasFootstep && pb.type != -1) {
+                    if (pb != null && pb.hasEnchant && pb.hasFootstep && pb.type != -1) {
                         pb.drawWaypoint(event.partialTicks)
                     }
                 }
@@ -360,7 +362,7 @@ class GriffinBurrows {
                     1 -> type = EnumChatFormatting.RED.toString() + "Mob"
                     2 -> type = EnumChatFormatting.GOLD.toString() + "Treasure"
                 }
-                return String.format("%s §a(Particle)", type)
+                return "$type §a(Particle)"
             }
         private val color: Color
             get() {
@@ -443,12 +445,9 @@ class GriffinBurrows {
                         closest = warp
                     }
                 }
-                return String.format(
-                    "%s §bPosition: %s/4%s",
-                    type,
-                    chain + 1,
-                    if (closest != null) " " + closest.nameWithColor else ""
-                )
+                return "$type §bPosition: ${chain + 1}/4${
+                    if (closest != null) " ${closest.nameWithColor}" else ""
+                }"
             }
 
         private val color: Color

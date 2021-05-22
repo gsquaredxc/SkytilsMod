@@ -59,7 +59,8 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         name = "Hypixel API Key",
         description = "Your Hypixel API key, which can be obtained from /api new. Required for some features.",
         category = "General",
-        subcategory = "API"
+        subcategory = "API",
+        protected = true
     )
     var apiKey = ""
 
@@ -368,6 +369,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
 
     @Property(
         type = PropertyType.SWITCH,
+        name = "Show Giant HP at Feet",
+        description = "Shows the HP of giants' at the giant's feet.",
+        category = "Dungeons",
+        subcategory = "Quality of Life"
+    )
+    var showGiantHPAtFeet = false
+
+    @Property(
+        type = PropertyType.SWITCH,
         name = "Show Guardian Respawn Timer",
         description = "Shows the respawn timer for the Guardians in Floor 3.",
         category = "Dungeons",
@@ -534,6 +544,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Solvers"
     )
     var threeWeirdosSolver = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Tic Tac Toe Solver",
+        description = "§b[WIP] §rDisplays the best move on the Tic Tac Toe puzzle.",
+        category = "Dungeons",
+        subcategory = "Solvers"
+    )
+    var ticTacToeSolver = false
 
     @Property(
         type = PropertyType.SWITCH,
@@ -866,6 +885,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Mythological"
     )
     var trackGaiaHits = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Hide Leftover Bleeds",
+        description = "Removes the bleeds text left behind when a player dies to a Minotaur.",
+        category = "Events",
+        subcategory = "Mythological"
+    )
+    var removeLeftOverBleeds = false
 
     @Property(
         type = PropertyType.SWITCH,
@@ -1386,6 +1414,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
    )*/
     @JvmField
     var hideCreeperVeilNearNPCs = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Hide Dying Mobs",
+        description = "Removes dead/dying mobs from your screen.",
+        category = "Dungeons",
+        subcategory = "Quality of Life"
+    )
+    var hideDyingMobs = false
 
     @Property(
         type = PropertyType.SWITCH,
@@ -2173,7 +2210,7 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         registerListener(::darkModeMist) { mc.renderGlobal.loadRenderers() }
         registerListener(::recolorCarpets) { mc.renderGlobal.loadRenderers() }
 
-        this.dataURL = "https://cdn.jsdelivr.net/gh/Skytils/SkytilsMod-Data/"
+        this.dataURL = "https://cdn.jsdelivr.net/gh/Skytils/SkytilsMod-Data@main/"
 
         if (this.largerHeadScale > 2) {
             this.largerHeadScale /= 100

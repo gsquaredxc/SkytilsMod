@@ -21,21 +21,26 @@ import com.google.common.base.Predicate
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.world.World
 import net.minecraftforge.client.event.ClientChatReceivedEvent
+import net.minecraftforge.client.event.RenderLivingEvent
+import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
+import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import skytils.skytilsmod.utils.stripControlCodes
+import java.awt.Color
 import java.util.regex.Pattern
 
 class BossHPDisplays {
@@ -56,8 +61,41 @@ class BossHPDisplays {
     }
 
     @SubscribeEvent
-    fun onWorldChange(event: WorldEvent.Load?) {
+    fun onWorldChange(event: WorldEvent.Load) {
         canGiantsSpawn = false
+    }
+
+    @SubscribeEvent
+    fun onRenderWorld(event: RenderWorldLastEvent) {
+        if (!Utils.inDungeons) return
+        if (canGiantsSpawn && Skytils.config.showGiantHPAtFeet) {
+            val isSadanPlayer = mc.theWorld.getPlayerEntityByName("Sadan ") != null
+            for (entity in mc.theWorld.loadedEntityList) {
+                if (entity !is EntityArmorStand) continue
+                val name = entity.displayName.formattedText
+                if (name.contains("❤") && (!isSadanPlayer && name.contains("§e﴾ §c§lSadan§r") || (name.contains("Giant") && Utils.equalsOneOf(
+                        DungeonFeatures.dungeonFloor,
+                        "F7",
+                        "M6"
+                    )) || GiantHPElement.GIANT_NAMES.any {
+                        name.contains(
+                            it
+                        )
+                    })
+                ) {
+                    GlStateManager.disableCull()
+                    GlStateManager.disableDepth()
+                    RenderUtil.draw3DString(
+                        entity.positionVector.addVector(0.0, -10.0, 0.0),
+                        name,
+                        Color.WHITE,
+                        event.partialTicks
+                    )
+                    GlStateManager.enableDepth()
+                    GlStateManager.enableCull()
+                }
+            }
+        }
     }
 
     companion object {
@@ -75,8 +113,8 @@ class BossHPDisplays {
         private val timerRegex = Pattern.compile("§c ☠ §7 (.+?) §c ☠ §7")
 
         override fun render() {
-            if (toggled && DungeonsFeatures.hasBossSpawned && Utils.equalsOneOf(
-                    DungeonsFeatures.dungeonFloor,
+            if (toggled && DungeonFeatures.hasBossSpawned && Utils.equalsOneOf(
+                    DungeonFeatures.dungeonFloor,
                     "M3",
                     "F3"
                 ) && mc.theWorld != null
@@ -158,14 +196,23 @@ class BossHPDisplays {
                         if (name.contains("❤")) {
                             if (name.contains("§e﴾ §c§lSadan§r")) {
                                 return@Predicate true
-                            } else if (name.contains("Giant") && DungeonsFeatures.dungeonFloor == "F7") return@Predicate true
+                            } else if (name.contains("Giant") && Utils.equalsOneOf(
+                                    DungeonFeatures.dungeonFloor,
+                                    "F7",
+                                    "M6"
+                                )
+                            ) return@Predicate true
                             for (giant in GIANT_NAMES) {
                                 if (name.contains(giant)) return@Predicate true
                             }
                         }
                         false
                     })
-                giantNames.removeIf { entity: EntityArmorStand -> entity.displayName.formattedText.contains("Sadan") && giantNames.size > 1 }
+                giantNames.removeIf { entity: EntityArmorStand ->
+                    DungeonFeatures.dungeonFloor == "F6" && entity.displayName.formattedText.contains(
+                        "Sadan"
+                    ) && giantNames.size > 1
+                }
                 val sr = ScaledResolution(Minecraft.getMinecraft())
                 val leftAlign = actualX < sr.scaledWidth / 2f
                 for (i in giantNames.indices) {
@@ -208,8 +255,14 @@ class BossHPDisplays {
             get() = Skytils.config.showGiantHP
 
         companion object {
-            private val GIANT_NAMES =
-                arrayOf("§3§lThe Diamond Giant", "§c§lBigfoot", "§4§lL.A.S.R.", "§d§lJolly Pink Giant")
+            val GIANT_NAMES =
+                arrayOf(
+                    "§3§lThe Diamond Giant",
+                    "§c§lBigfoot",
+                    "§4§lL.A.S.R.",
+                    "§d§lJolly Pink Giant",
+                    "§d§lMutant Giant"
+                )
         }
 
         init {

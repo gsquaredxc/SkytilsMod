@@ -18,6 +18,7 @@
 
 package skytils.skytilsmod.listeners
 
+import io.netty.util.internal.ConcurrentSet
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.util.ChatComponentText
@@ -34,23 +35,44 @@ import skytils.skytilsmod.utils.TabListUtils
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.getText
 import skytils.skytilsmod.utils.stripControlCodes
+import java.util.regex.Pattern
 
 object DungeonListener {
 
-    val team = HashSet<DungeonTeammate>()
-    val deads = HashSet<DungeonTeammate>()
+    val team = ConcurrentSet<DungeonTeammate>()
+    val deads = ConcurrentSet<DungeonTeammate>()
+    val missingPuzzles = ConcurrentSet<String>()
 
     private val partyCountPattern = Regex("§r {9}§r§b§lParty §r§f\\(([1-5])\\)§r")
     private val classPattern =
         Regex("§r§.(?<name>\\w+?) §r§f\\(§r§d(?<class>Archer|Berserk|Healer|Mage|Tank) (?<lvl>\\w+)§r§f\\)§r")
+    private val missingPuzzlePattern = Regex("§r (?<puzzle>.+): §r§7\\[§r§6§l✦§r§7]§r")
 
     private var ticks = 0
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
-        if (ticks % 2 == 0) {
+        if (ticks % 4 == 0) {
+            val localMissingPuzzles = HashSet<String>()
+            for (pi in TabListUtils.tabEntries) {
+                val name = pi.getText()
+                if (name.contains("✦")) {
+                    val matcher = missingPuzzlePattern.find(name)
+                    if (matcher != null) {
+                        val puzzleName = matcher.groups["puzzle"]!!.value
+                        if (puzzleName != "???") {
+                            localMissingPuzzles.add(puzzleName)
+                        }
+                        continue
+                    }
+                }
+            }
+            missingPuzzles.clear()
+            missingPuzzles.addAll(localMissingPuzzles)
             ticks = 0
+        }
+        if (ticks % 2 == 0) {
             if (DungeonTimer.scoreShownAt == -1L) {
                 val tabEntries = TabListUtils.tabEntries
                 for (teammate in team) {
@@ -87,6 +109,7 @@ object DungeonListener {
             if (event.packet.chatComponent.formattedText.startsWith("§r§aDungeon starts in 1 second.")) {
                 team.clear()
                 deads.clear()
+                missingPuzzles.clear()
                 TickTask(40) {
                     getMembers()
                 }
@@ -126,7 +149,7 @@ object DungeonListener {
         }
 
         val partyCount = partyCountPattern.find(tabEntries[0].getText())?.groupValues?.get(1)?.toInt()
-
+        println("There are $partyCount members in this party")
         for (i in 0 until partyCount!!) {
             val pos = 1 + i * 4
             val text = tabEntries[pos].getText()

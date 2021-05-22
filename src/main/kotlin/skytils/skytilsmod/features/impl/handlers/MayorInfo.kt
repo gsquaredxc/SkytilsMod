@@ -29,13 +29,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.core.SoundQueue
+import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.events.GuiContainerEvent
 import skytils.skytilsmod.utils.*
 import java.io.IOException
 import java.net.URLEncoder
 import java.time.ZonedDateTime
 import java.util.*
-import kotlin.concurrent.thread
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -137,7 +137,7 @@ object MayorInfo {
         if (event.container is ContainerChest) {
             val chest = event.container
             val chestName = chest.lowerChestInventory.displayName.unformattedText
-            if (currentMayor == "Jerry" && chestName == "Mayor Jerry" && event.slot.slotNumber == 11 && event.slot.hasStack && jerryMayor == null) {
+            if (currentMayor == "Jerry" && chestName == "Mayor Jerry" && event.slot.slotNumber == 11 && event.slot.hasStack) {
                 val lore = ItemUtil.getItemLore(event.slot.stack)
                 if (!lore.contains("§9Perkpocalypse Perks:")) return
                 val endingIn = lore.find { it.startsWith("§7Next set of perks in") } ?: return
@@ -152,12 +152,14 @@ object MayorInfo {
                 val matcher = jerryNextPerkRegex.find(endingIn) ?: return
                 val timeLeft =
                     Duration.hours(matcher.groups["h"]!!.value.toInt()) + Duration.minutes(matcher.groups["m"]!!.value.toInt())
-                newJerryPerks =
-                    (ZonedDateTime.now().withSecond(0).withNano(0)
-                        .toEpochSecond() * 1000) + timeLeft.inWholeMilliseconds
+                val nextPerks = (ZonedDateTime.now().withSecond(59).withNano(999999999)
+                    .toEpochSecond() * 1000) + timeLeft.inWholeMilliseconds
+                if (jerryMayor != mayor || nextPerks != newJerryPerks) {
+                    println("Jerry has ${mayor.name}'s perks ($perks) and is ending in $newJerryPerks ($${endingIn.stripControlCodes()})")
+                    sendJerryData(mayor, nextPerks)
+                }
+                newJerryPerks = nextPerks
                 jerryMayor = mayor
-                println("Jerry has ${mayor.name}'s perks ($perks) and is ending in $newJerryPerks ($${endingIn.stripControlCodes()})")
-                sendJerryData(mayor, newJerryPerks)
             } else if ((chestName == "Mayor $currentMayor" && mayorPerks.size == 0) || (chestName.startsWith("Mayor ") && (currentMayor == null || !chestName.contains(
                     currentMayor!!
                 )))
@@ -193,7 +195,7 @@ object MayorInfo {
     }
 
     fun fetchMayorData() {
-        thread(name = "Skytils-FetchMayor") {
+        Skytils.threadPool.submit {
             val res = APIUtil.getJSONResponse(baseURL)
             if (res.has("name") && res.has("perks")) {
                 if (res["name"].asString == currentMayor) isLocal = false
@@ -213,7 +215,7 @@ object MayorInfo {
     fun sendMayorData(mayor: String?, perks: HashSet<String>) {
         if (mayor == null || perks.size == 0) return
         if (lastSentData - System.currentTimeMillis() < 300000) lastSentData = System.currentTimeMillis()
-        thread(name = "Skytils-SendMayor") {
+        Skytils.threadPool.submit {
             try {
                 val serverId = UUID.randomUUID().toString().replace("-".toRegex(), "")
                 val url =
@@ -240,18 +242,20 @@ object MayorInfo {
     }
 
     fun fetchJerryData() {
-        thread(name = "Skytils-FetchJerry") {
+        Skytils.threadPool.submit {
             val res = APIUtil.getJSONResponse("$baseURL/jerry")
             if (res.has("nextSwitch") && res.has("mayor") && res.has("perks")) {
-                newJerryPerks = res["nextSwitch"].asLong
-                jerryMayor = mayorData.find { it.name == res["mayor"].asJsonObject["name"].asString }
+                TickTask(1) {
+                    newJerryPerks = res["nextSwitch"].asLong
+                    jerryMayor = mayorData.find { it.name == res["mayor"].asJsonObject["name"].asString }
+                }
             }
         }
     }
 
     fun sendJerryData(mayor: Mayor?, nextSwitch: Long) {
         if (nextSwitch <= 0 || mayor == null) return
-        thread(name = "Skytils-SendJerry") {
+        Skytils.threadPool.submit {
             try {
                 val serverId = UUID.randomUUID().toString().replace("-".toRegex(), "")
                 val url =

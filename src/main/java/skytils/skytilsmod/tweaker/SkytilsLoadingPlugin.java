@@ -17,9 +17,12 @@ public class SkytilsLoadingPlugin implements IFMLLoadingPlugin {
     private static final String errorMessage =
         "<html><p>" +
         "Skytils has detected a mod with an older version of Kotlin.<br>" +
+        "The most common culprit is the ChatTriggers mod.<br>" +
         "In order to resolve this conflict you must make Skytils be<br>" +
         "above this mod alphabetically in your mods folder.<br>" +
-        "You can do this by renaming your Skytils jar to !Skytils.jar.<br>" +
+        "This tricks Forge into loading Skytils first.<br>" +
+        "You can do this by renaming your Skytils jar to !Skytils.jar,<br>" +
+        "or by renaming the other mod's jar to start with a Z.<br>" +
         "If you have already done this and are still getting this error,<br>" +
         "ask for support in the Discord." +
         "</p></html>";
@@ -63,6 +66,13 @@ public class SkytilsLoadingPlugin implements IFMLLoadingPlugin {
             e.printStackTrace();
         }
 
+        // This makes the JOptionPane show on taskbar and stay on top
+        JFrame frame = new JFrame();
+        frame.setUndecorated(true);
+        frame.setAlwaysOnTop(true);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
         Icon icon = null;
         try {
             URL url = SkytilsLoadingPlugin.class.getResource("/assets/skytils/sychicpet.gif");
@@ -95,7 +105,7 @@ public class SkytilsLoadingPlugin implements IFMLLoadingPlugin {
 
         Object[] options = new Object[]{discordLink, close};
         JOptionPane.showOptionDialog(
-            null,
+            frame,
             errorMessage,
             "Skytils Error",
             JOptionPane.DEFAULT_OPTION,

@@ -23,7 +23,7 @@ import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.Blocks
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraft.tileentity.TileEntityChest
 import net.minecraft.util.*
 import net.minecraft.world.World
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -32,7 +32,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.events.PacketEvent.SendEvent
+import skytils.skytilsmod.listeners.DungeonListener
 import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
 import java.awt.Color
@@ -50,7 +50,7 @@ class BoulderSolver {
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!Skytils.config.boulderSolver) return
+        if (!Skytils.config.boulderSolver || !DungeonListener.missingPuzzles.contains("Boulder")) return
         if (boulderChest == null) return
         if (roomVariant >= 0) {
             val steps = variantSteps[roomVariant]
@@ -85,17 +85,6 @@ class BoulderSolver {
     }
 
     @SubscribeEvent
-    fun onSendPacket(event: SendEvent) {
-        if (!Utils.inDungeons) return
-        if (event.packet is C08PacketPlayerBlockPlacement) {
-            val packet = event.packet
-            if (packet.position != null && packet.position == boulderChest) {
-                roomVariant = -2
-            }
-        }
-    }
-
-    @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load?) {
         reset()
     }
@@ -118,12 +107,14 @@ class BoulderSolver {
         var variantSteps = ArrayList<ArrayList<BoulderPush>>()
         var expectedBoulders = ArrayList<ArrayList<BoulderState>>()
         private var ticks = 0
-        private var workerThread: Thread? = null
+        private var active = false
         fun update() {
+            if (!Skytils.config.boulderSolver || !DungeonListener.missingPuzzles.contains("Boulder")) return
             val player = mc.thePlayer
             val world: World? = mc.theWorld
-            if (Utils.inDungeons && world != null && player != null && roomVariant != -2 && (workerThread == null || !workerThread!!.isAlive || workerThread!!.isInterrupted)) {
-                workerThread = Thread({
+            if (!active && Utils.inDungeons && world != null && player != null && roomVariant != -2) {
+                active = true
+                Skytils.threadPool.submit {
                     var foundBirch = false
                     var foundBarrier = false
                     for (potentialBarrier in Utils.getBlocksWithinRangeAtSameY(player.position, 13, 68)) {
@@ -144,25 +135,29 @@ class BoulderSolver {
                             }
                         }
                     }
-                    if (!foundBirch || !foundBarrier) return@Thread
+                    if (!foundBirch || !foundBarrier) return@submit
                     if (boulderChest == null || boulderFacing == null) {
-                        for (potentialChestPos in Utils.getBlocksWithinRangeAtSameY(player.position, 25, 66)) {
-                            if (boulderChest != null && boulderFacing != null) break
-                            if (world.getBlockState(potentialChestPos).block === Blocks.chest) {
-                                if (world.getBlockState(potentialChestPos.down()).block === Blocks.stonebrick && world.getBlockState(
+                        findChest@ for (te in mc.theWorld.loadedTileEntityList) {
+                            val playerX = mc.thePlayer.posX.toInt()
+                            val playerZ = mc.thePlayer.posZ.toInt()
+                            val xRange = playerX - 25..playerX + 25
+                            val zRange = playerZ - 25..playerZ + 25
+                            if (te.pos.y == 66 && te is TileEntityChest && te.numPlayersUsing == 0 && te.pos.x in xRange && te.pos.z in zRange
+                            ) {
+                                val potentialChestPos = te.pos
+                                if (world.getBlockState(potentialChestPos.down()).block == Blocks.stonebrick && world.getBlockState(
                                         potentialChestPos.up(3)
-                                    ).block === Blocks.barrier
+                                    ).block == Blocks.barrier
                                 ) {
                                     boulderChest = potentialChestPos
                                     println("Boulder chest is at $boulderChest")
                                     for (direction in EnumFacing.HORIZONTALS) {
-                                        if (world.getBlockState(potentialChestPos.offset(direction)).block === Blocks.stained_hardened_clay) {
+                                        if (world.getBlockState(potentialChestPos.offset(direction)).block == Blocks.stained_hardened_clay) {
                                             boulderFacing = direction
                                             println("Boulder room is facing $direction")
-                                            break
+                                            break@findChest
                                         }
                                     }
-                                    break
                                 }
                             }
                         }
@@ -211,8 +206,8 @@ class BoulderSolver {
                             }
                         }
                     }
-                }, "Skytils-Boulder-Puzzle")
-                workerThread!!.start()
+                    active = false
+                }
             }
         }
 
@@ -221,7 +216,6 @@ class BoulderSolver {
             boulderFacing = null
             grid = Array(7) { arrayOfNulls(6) }
             roomVariant = -1
-            workerThread = null
         }
     }
 
