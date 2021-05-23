@@ -32,15 +32,13 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Mouse
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
-import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.SoundQueue
 import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.events.DamageBlockEvent
-import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
+import skytils.skytilsmod.utils.MiscUtils.checkForItem
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.stripControlCodes
 
@@ -97,14 +95,7 @@ class FarmingFeatures {
         }
 
         if (Skytils.config.hungryHikerSolver && formatted.startsWith("§e[NPC] Hungry Hiker§f: ")) {
-            if (hungerHikerItems.isEmpty()) {
-                mc.thePlayer.addChatMessage(ChatComponentText("§cSkytils did not load any solutions."))
-                DataFetcher.reloadData()
-                return
-            }
-            val solution = hungerHikerItems.getOrDefault(hungerHikerItems.keys.find { s: String ->
-                unformatted.contains(s)
-            }, null)
+            val solution = checkForItem(hungerHikerItems,unformatted)
             TickTask(4) {
                 if (solution != null) {
                     mc.thePlayer.addChatMessage(ChatComponentText(EnumChatFormatting.GREEN.toString() + "The Hiker needs: " + EnumChatFormatting.DARK_GREEN + EnumChatFormatting.BOLD + solution + EnumChatFormatting.GREEN + "!"))

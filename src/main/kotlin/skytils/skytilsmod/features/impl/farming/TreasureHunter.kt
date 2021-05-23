@@ -28,11 +28,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
-import skytils.skytilsmod.core.DataFetcher
-import skytils.skytilsmod.utils.RenderUtil
-import skytils.skytilsmod.utils.SBInfo
-import skytils.skytilsmod.utils.stripControlCodes
-import skytils.skytilsmod.utils.Utils
+import skytils.skytilsmod.utils.*
 import java.awt.Color
 
 
@@ -51,15 +47,7 @@ class TreasureHunter {
             treasureLocation = null
         }
         if (Skytils.config.treasureHunterSolver && formatted.startsWith("§e[NPC] Treasure Hunter§f: ")) {
-            if (treasureHunterLocations.isEmpty()) {
-                mc.thePlayer.addChatMessage(ChatComponentText("§cSkytils did not load any solutions."))
-                DataFetcher.reloadData()
-                return
-            }
-            val solution =
-                treasureHunterLocations.getOrDefault(treasureHunterLocations.keys.find { s: String ->
-                    unformatted.contains(s)
-                }, null)
+            val solution: BlockPos? = MiscUtils.checkForItem(FarmingFeatures.hungerHikerItems, unformatted) as BlockPos?
             if (solution != null) {
                 treasureLocation = solution
                 mc.thePlayer.addChatMessage(ChatComponentText("§aSkytils will track your treasure located at: §b(${solution.x},${solution.y},${solution.z})"))
