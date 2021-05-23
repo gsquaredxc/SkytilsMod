@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import skytils.skytilsmod.Skytils;
-import skytils.skytilsmod.utils.MathUtil;
 import skytils.skytilsmod.utils.Utils;
 
 @Mixin(LayerCustomHead.class)

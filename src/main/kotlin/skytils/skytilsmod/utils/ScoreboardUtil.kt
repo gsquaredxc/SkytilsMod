@@ -18,9 +18,9 @@
 package skytils.skytilsmod.utils
 
 import com.google.common.collect.Iterables
-import net.minecraft.client.Minecraft
 import net.minecraft.scoreboard.Score
 import net.minecraft.scoreboard.ScorePlayerTeam
+import skytils.skytilsmod.Skytils.Companion.mc
 
 /**
  * Taken from Danker's Skyblock Mod under GPL 3.0 license
@@ -44,8 +44,8 @@ object ScoreboardUtil {
     val sidebarLines: List<String>
         get() {
             val lines: MutableList<String> = ArrayList()
-            if (Minecraft.getMinecraft().theWorld == null) return lines
-            val scoreboard = Minecraft.getMinecraft().theWorld.scoreboard ?: return lines
+            val world = mc.theWorld ?: return lines
+            val scoreboard = world.scoreboard ?: return lines
             val objective = scoreboard.getObjectiveInDisplaySlot(1) ?: return lines
             var scores = scoreboard.getSortedScores(objective)
             val list = scores.filter { input: Score? ->

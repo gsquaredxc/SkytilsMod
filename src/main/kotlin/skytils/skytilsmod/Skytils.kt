@@ -136,8 +136,7 @@ class Skytils {
         @JvmField
         val farmingFeatures: FarmingFeatures = FarmingFeatures()
 
-        @JvmField
-        val dungeonFeatures: DungeonsFeatures = DungeonsFeatures()
+        lateinit var dungeonFeatures: DungeonFeatures
 
         @JvmField
         val iceFillSolver: IceFillSolver = IceFillSolver()
@@ -155,7 +154,7 @@ class Skytils {
         val startsWithSequenceSolver: StartsWithSequenceSolver = StartsWithSequenceSolver()
 
         @JvmField
-        val threadPool = Executors.newFixedThreadPool(10)
+        val threadPool: ExecutorService = Executors.newFixedThreadPool(10)
     }
 
 
@@ -182,6 +181,7 @@ class Skytils {
 
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
+        dungeonFeatures = DungeonFeatures()
         config = Config()
         config.preload()
 

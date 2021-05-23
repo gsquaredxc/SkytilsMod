@@ -26,10 +26,6 @@ class Board internal constructor() {
      * @return          the player who won (or Blank if the game is a draw)
      */
     var winner: State? = null
-        get() {
-            //check(isGameOver) { "TicTacToe is not over yet." }
-            return field
-        }
 
     /**
      * Get the indexes of all the positions on the board that are empty.

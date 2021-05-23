@@ -35,7 +35,6 @@ import skytils.skytilsmod.utils.TabListUtils
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.getText
 import skytils.skytilsmod.utils.stripControlCodes
-import java.util.regex.Pattern
 
 object DungeonListener {
 

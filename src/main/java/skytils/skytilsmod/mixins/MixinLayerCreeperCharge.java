@@ -33,7 +33,7 @@ import static com.gsquaredxc.hyskyAPI.state.location.ServerTypes.DwarvenMines;
 @Mixin(LayerCreeperCharge.class)
 public abstract class MixinLayerCreeperCharge implements LayerRenderer<EntityCreeper> {
 
-    ResourceLocation VISIBLE_CREEPER_ARMOR = new ResourceLocation("skytils", "creeper_armor.png");
+    final ResourceLocation VISIBLE_CREEPER_ARMOR = new ResourceLocation("skytils", "creeper_armor.png");
 
     @ModifyArg(method = "doRenderLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/RenderCreeper;bindTexture(Lnet/minecraft/util/ResourceLocation;)V"))
     private ResourceLocation modifyChargedCreeperLayer(ResourceLocation res) {

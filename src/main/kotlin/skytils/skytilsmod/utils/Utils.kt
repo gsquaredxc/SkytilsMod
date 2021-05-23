@@ -68,8 +68,9 @@ object Utils {
         get() {
             try {
                 if (mc.theWorld != null && !mc.isSingleplayer) {
-                    if (mc.thePlayer != null && mc.thePlayer.clientBrand != null) {
-                        if (mc.thePlayer.clientBrand.lowercase().contains("hypixel")) return true
+                    val player = mc.thePlayer
+                    if (player != null && player.clientBrand != null) {
+                        if (player.clientBrand.lowercase().contains("hypixel")) return true
                     }
                     if (mc.currentServerData != null) return mc.currentServerData.serverIP.lowercase()
                         .contains("hypixel")
@@ -88,7 +89,7 @@ object Utils {
      */
     fun checkForSkyblock() {
         if (isOnHypixel) {
-            val scoreboardObj = mc!!.theWorld.scoreboard.getObjectiveInDisplaySlot(1)
+            val scoreboardObj = mc.theWorld.scoreboard.getObjectiveInDisplaySlot(1)
             if (scoreboardObj != null) {
                 val scObjName = ScoreboardUtil.cleanSB(scoreboardObj.displayName)
                 if (scObjName.contains("SKYBLOCK")) {

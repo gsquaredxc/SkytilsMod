@@ -93,20 +93,23 @@ class MayorDiana {
         }
 
     @SubscribeEvent
-    fun onCheckRenderEntityEvent(CheckRenderEntityEvent<EntityArmorStand> event) {
-        val entity = event.entity
-        if (Skytils.config.removeLeftOverBleeds && mc.theWorld != null && entity.hasCustomName() && entity.displayName.formattedText.startsWith(
-                "§c☣ §fBleeds: §c"
-            ) && entity.ticksExisted >= 20
-        ) {
-            val aabb = entity.entityBoundingBox.expand(2.0, 5.0, 2.0)
-            if (mc.theWorld.loadedEntityList.none {
-                    it.displayName.formattedText.endsWith("§c❤") && it.displayName.formattedText.contains(
-                        "Minotaur §"
-                    ) && it.entityBoundingBox.intersectsWith(aabb)
-                }) {
-                event.isCanceled = true
-                mc.theWorld.removeEntity(entity)
+    fun onCheckRenderEntityEvent(event: CheckRenderEntityEvent<EntityArmorStand>) {
+        @Suppress("USELESS_IS_CHECK")
+        if (event.entity is EntityArmorStand) {
+            val entity = event.entity
+            if (Skytils.config.removeLeftOverBleeds && mc.theWorld != null && entity.hasCustomName() && entity.displayName.formattedText.startsWith(
+                    "§c☣ §fBleeds: §c"
+                ) && entity.ticksExisted >= 20
+            ) {
+                val aabb = entity.entityBoundingBox.expand(2.0, 5.0, 2.0)
+                if (mc.theWorld.loadedEntityList.none {
+                        it.displayName.formattedText.endsWith("§c❤") && it.displayName.formattedText.contains(
+                            "Minotaur §"
+                        ) && it.entityBoundingBox.intersectsWith(aabb)
+                    }) {
+                    event.isCanceled = true
+                    mc.theWorld.removeEntity(entity)
+                }
             }
         }
     }

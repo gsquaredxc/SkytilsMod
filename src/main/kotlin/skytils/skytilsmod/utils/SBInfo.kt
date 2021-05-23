@@ -17,24 +17,16 @@
  */
 package skytils.skytilsmod.utils
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.inventory.ContainerChest
 import net.minecraft.scoreboard.Score
 import net.minecraft.scoreboard.ScorePlayerTeam
-import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.events.SendChatMessageEvent
-import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
