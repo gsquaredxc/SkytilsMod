@@ -18,7 +18,6 @@
 package skytils.skytilsmod.commands
 
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
-import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender
 import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender.SAFE_MESSAGE_SENDER
 import net.minecraft.client.Minecraft
 import net.minecraft.command.CommandBase
@@ -27,8 +26,6 @@ import net.minecraft.command.ICommandSender
 import net.minecraft.command.WrongUsageException
 import net.minecraft.util.ChatComponentText
 import net.minecraft.util.EnumChatFormatting
-import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.utils.Utils
 
 object RepartyCommand : CommandBase(), ICommand {
 

@@ -184,10 +184,6 @@ task moveResources {
         from '../hyskyAPI/build/libs'
         into 'run/mods'
     }
-    doLast {
-        ant.move file: "${buildDir}/resources/main",
-                todir: "${buildDir}/classes/kotlin"
-    }
 }
 
 tasks.moveResources.dependsOn processResources

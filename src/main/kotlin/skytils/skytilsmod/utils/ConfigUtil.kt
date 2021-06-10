@@ -1,6 +1,6 @@
 package skytils.skytilsmod.utils
 
-import club.sk1er.vigilance.Vigilant
+import gg.essential.vigilance.Vigilant
 import com.gsquaredxc.hyskyAPI.PublicListeners
 import com.gsquaredxc.hyskyAPI.StateRegister.StateRegister
 import com.gsquaredxc.hyskyAPI.eventListeners.Event

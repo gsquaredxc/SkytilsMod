@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.commands
 
+import com.gsquaredxc.hyskyAPI.utils.SafeMessageSender
 import kotlinx.coroutines.*
 import net.minecraft.client.entity.EntityPlayerSP
 import net.minecraft.command.CommandBase
@@ -182,10 +183,10 @@ object SkytilsCommand : CommandBase() {
             )
             "swaphub" -> {
                 if (Utils.inSkyblock) {
-                    Skytils.sendMessageQueue.add("/warpforge")
+                    SafeMessageSender.SAFE_MESSAGE_SENDER.queueMessage("/warpforge")
                     CoroutineScope(Dispatchers.Default).launch {
                         delay(500)
-                        Skytils.sendMessageQueue.add("/warp hub")
+                        SafeMessageSender.SAFE_MESSAGE_SENDER.queueMessage("/warp hub")
                     }
                 }
             }

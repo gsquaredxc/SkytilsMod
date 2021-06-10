@@ -35,8 +35,6 @@ import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.features.impl.handlers.AuctionData
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import skytils.skytilsmod.utils.Utils.readTextAndClose
-import java.io.IOException
-import java.net.URISyntaxException
 import java.net.URL
 import java.util.*
 

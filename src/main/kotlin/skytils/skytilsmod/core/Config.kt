@@ -29,6 +29,7 @@ import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.dungeonFeatures
 import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
+import skytils.skytilsmod.utils.ConfigUtil
 import java.awt.Color
 import java.io.File
 
