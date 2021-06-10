@@ -32,9 +32,10 @@ import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.events.CheckRenderEntityEvent
 import skytils.skytilsmod.events.PacketEvent
-import skytils.skytilsmod.mixins.AccessorMinecraft
+import skytils.skytilsmod.mixins.accessors.AccessorMinecraft
 import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
+import skytils.skytilsmod.utils.baseMaxHealth
 import java.awt.Color
 
 class MayorDiana {
@@ -49,35 +50,45 @@ class MayorDiana {
             if (packet.volume == 0f) return
             if (packet.volume == 0.8f && packet.soundName == "random.anvil_land") {
                 val pos = BlockPos(packet.x, packet.y, packet.z)
-                for (entity in mc.theWorld.loadedEntityList) {
-                    if (entity is EntityIronGolem && entity.isEntityAlive && entity.getDistanceSq(pos) <= 2 * 2) {
-                        gaiaConstructHits.compute(entity) { _: EntityIronGolem, i: Int? -> if (i == null) 1 else i + 1 }
-                        break
-                    }
+                val golem = (mc.theWorld.loadedEntityList.filter {
+                    it is EntityIronGolem && it.health > 0 && it.getDistanceSq(pos) <= 25 * 25
+                }.minByOrNull { it.getDistanceSq(pos) } ?: return) as EntityIronGolem
+                gaiaConstructHits.compute(golem) { _: EntityIronGolem, i: Int? -> (i ?: 0) + 1 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onCheckRender(event: CheckRenderEntityEvent<EntityArmorStand>) {
+        @Suppress("USELESS_IS_CHECK")
+        if (event.entity is EntityArmorStand) {
+            val entity = event.entity
+            if (Skytils.config.removeLeftOverBleeds && mc.theWorld != null && entity.hasCustomName() && entity.displayName.formattedText.startsWith(
+                            "§c☣ §fBleeds: §c"
+                    ) && entity.ticksExisted >= 20
+            ) {
+                val aabb = entity.entityBoundingBox.expand(2.0, 5.0, 2.0)
+                if (mc.theWorld.loadedEntityList.none {
+                            it.displayName.formattedText.endsWith("§c❤") && it.displayName.formattedText.contains(
+                                    "Minotaur §"
+                            ) && it.entityBoundingBox.intersectsWith(aabb)
+                        }) {
+                    event.isCanceled = true
+                    mc.theWorld.removeEntity(entity)
                 }
             }
         }
     }
 
     @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
-        if (event.phase == TickEvent.Phase.START) for (golem in gaiaConstructHits.keys) {
-            if (golem.hurtTime == 10) {
-                gaiaConstructHits[golem] = 0
-            }
-        }
-    }
-
-    @SubscribeEvent
-    fun onRender(event: RenderLivingEvent.Post<EntityIronGolem>) {
+    fun onPostRenderEntity(event: RenderLivingEvent.Post<EntityIronGolem>) {
         if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
         val golem: EntityIronGolem = event.entity as EntityIronGolem
         if (gaiaConstructHits.containsKey(golem)) {
-                val percentageHp = golem.health / golem.maxHealth
+                val percentageHp = golem.health / golem.baseMaxHealth
                 val neededHits = when {
-                    percentageHp <= (1f / 3f) -> 7
-                    percentageHp <= (2f / 3f) -> 6
+                    percentageHp <= 0.33 -> 7
+                    percentageHp <= 0.66 -> 6
                     else -> 5
                 }
                 val hits = gaiaConstructHits.getOrDefault(golem, 0)
@@ -93,23 +104,11 @@ class MayorDiana {
         }
 
     @SubscribeEvent
-    fun onCheckRenderEntityEvent(event: CheckRenderEntityEvent<EntityArmorStand>) {
-        @Suppress("USELESS_IS_CHECK")
-        if (event.entity is EntityArmorStand) {
-            val entity = event.entity
-            if (Skytils.config.removeLeftOverBleeds && mc.theWorld != null && entity.hasCustomName() && entity.displayName.formattedText.startsWith(
-                    "§c☣ §fBleeds: §c"
-                ) && entity.ticksExisted >= 20
-            ) {
-                val aabb = entity.entityBoundingBox.expand(2.0, 5.0, 2.0)
-                if (mc.theWorld.loadedEntityList.none {
-                        it.displayName.formattedText.endsWith("§c❤") && it.displayName.formattedText.contains(
-                            "Minotaur §"
-                        ) && it.entityBoundingBox.intersectsWith(aabb)
-                    }) {
-                    event.isCanceled = true
-                    mc.theWorld.removeEntity(entity)
-                }
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
+        if (event.phase == TickEvent.Phase.START) for (golem in gaiaConstructHits.keys) {
+            if (golem.hurtTime == 10) {
+                gaiaConstructHits[golem] = 0
             }
         }
     }

@@ -91,32 +91,4 @@ public abstract class MixinMinecraft {
         }
         this.mcResourceManager.registerReloadListener(ScreenRenderer.fontRenderer);
     }
-
-    @Inject(method = "run", at = @At("HEAD"))
-    private void preRun(CallbackInfo ci) {
-/*        File file = new File(new File(mcDataDir, "config"), "vigilance.toml");
-        if (!file.exists()) {
-            CloseableHttpClient client = APIUtil.INSTANCE.getBuilder().build();
-            try {
-                HttpGet request = new HttpGet(new URL(Skytils.config.getDataURL() + "files/vigilance.toml").toURI());
-                request.setProtocolVersion(HttpVersion.HTTP_1_1);
-                HttpResponse response = client.execute(request);
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    if (file.createNewFile()) {
-                        response.getEntity().writeTo(new FileOutputStream(file));
-                    } else {
-                        throw new IllegalStateException("Failed to create file");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    client.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
-    }
 }

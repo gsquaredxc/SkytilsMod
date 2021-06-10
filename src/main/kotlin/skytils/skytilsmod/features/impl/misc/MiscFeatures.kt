@@ -24,6 +24,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.EntityOtherPlayerMP
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.effect.EntityLightningBolt
 import net.minecraft.entity.item.EntityArmorStand
@@ -38,11 +39,13 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemMonsterPlacer
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.server.S29PacketSoundEffect
+import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderBlockOverlayEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent
+import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -58,7 +61,7 @@ import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.ItemUtil.getExtraAttributes
 import skytils.skytilsmod.utils.ItemUtil.getSkyBlockItemID
-import skytils.skytilsmod.utils.NumberUtil.round
+import skytils.skytilsmod.utils.NumberUtil.roundToPrecision
 import skytils.skytilsmod.utils.RenderUtil.highlight
 import skytils.skytilsmod.utils.RenderUtil.renderItem
 import skytils.skytilsmod.utils.RenderUtil.renderTexture
@@ -140,7 +143,7 @@ class MiscFeatures {
                 if (ItemUtil.getItemLore(item).any {
                         it == "§7Currently: §cDISABLED"
                     }) {
-                    event.slot highlight Color(0, 0, 0, 80)
+                    event.slot highlight Color(255, 0, 0, 80)
                 }
             }
         }
@@ -177,6 +180,31 @@ class MiscFeatures {
     fun onRenderBlockOverlay(event: RenderBlockOverlayEvent) {
         if (Utils.inSkyblock && Skytils.config.noFire && event.overlayType == RenderBlockOverlayEvent.OverlayType.FIRE) {
             event.isCanceled = true
+        }
+    }
+
+    @SubscribeEvent
+    fun onRenderWorld(event: RenderWorldLastEvent) {
+        if (!Utils.inSkyblock) return
+        // TODO: Get someone to test this
+        if (Skytils.config.showEtherwarpTeleportPos && mc.thePlayer?.isSneaking == true) {
+            val extraAttr = getExtraAttributes(mc.thePlayer.heldItem) ?: return
+            if (!extraAttr.getBoolean("ethermerge")) return
+            val dist = 57.0 + extraAttr.getInteger("tuned_transmission")
+            val block = (mc.thePlayer.rayTrace(dist, event.partialTicks) ?: return).blockPos
+            if (mc.theWorld.getBlockState(block).block != Blocks.air) {
+                val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
+
+                val x = block.x - viewerX
+                val y = block.y - viewerY
+                val z = block.z - viewerZ
+
+                GlStateManager.disableCull()
+                GlStateManager.disableDepth()
+                RenderUtil.drawFilledBoundingBox(AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1), Color.BLUE, 0.8f)
+                GlStateManager.enableCull()
+                GlStateManager.enableDepth()
+            }
         }
     }
 
@@ -246,13 +274,12 @@ class MiscFeatures {
         val item = event.slot.stack
         if (getSkyBlockItemID(item) == null) {
             if (SBInfo.lastOpenContainerName.startsWithAny(
-                    "Auctions"
-                ) && item.item === Items.arrow
-            ) return
-            if (SBInfo.lastOpenContainerName.startsWithAny(
                     "Reforge Item"
                 ) && item.item === Item.getItemFromBlock(Blocks.anvil) && item.displayName == "§aReforge Item"
             ) return
+            if (ItemUtil.getItemLore(item).any {
+                    it.startsWith("§bRight-Click")
+                }) return
             event.isCanceled = true
             mc.playerController.windowClick(chest.windowId, event.slotId, 2, 0, mc.thePlayer)
         }
@@ -276,7 +303,7 @@ class MiscFeatures {
                 val sr = ScaledResolution(mc)
                 val leftAlign = actualX < sr.scaledWidth / 2f
                 val text =
-                    "§cGolem spawn in: §a" + round((golemSpawnTime - System.currentTimeMillis()) / 1000.0, 1) + "s"
+                    "§cGolem spawn in: §a" + ((golemSpawnTime - System.currentTimeMillis()) / 1000.0).roundToPrecision(1) + "s"
                 val alignment = if (leftAlign) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
                 ScreenRenderer.fontRenderer.drawString(
                     text,

@@ -19,6 +19,7 @@ package skytils.skytilsmod.features.impl.misc
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.EntityOtherPlayerMP
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.projectile.EntityFishHook
@@ -27,6 +28,7 @@ import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.server.S2APacketParticles
+import net.minecraft.util.ChatComponentText
 import net.minecraft.util.EnumParticleTypes
 import net.minecraft.util.Vec3
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
@@ -35,6 +37,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
+import skytils.skytilsmod.core.GuiManager
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.GuiContainerEvent
@@ -68,7 +71,12 @@ class ItemFeatures {
             val chest = gui.inventorySlots as ContainerChest
             val inv = chest.lowerChestInventory
             val chestName = inv.displayName.unformattedText.trim { it <= ' ' }
-            if (chestName.startsWith("Salvage") || chestName.startsWith("Storage") || chestName == "Ophelia" || chestName == "Trades") {
+            if (chestName.startsWithAny("Salvage", "Ender Chest") || Utils.equalsOneOf(
+                    chestName,
+                    "Ophelia",
+                    "Trades"
+                ) || (chestName.contains("Backpack") && !chestName.endsWith("Recipe"))
+            ) {
                 if (Skytils.config.highlightSalvageableItems) {
                     if (event.slot.hasStack) {
                         val stack = event.slot.stack
@@ -148,7 +156,7 @@ class ItemFeatures {
                     if (lore[0] == "§8Item Reward" && lore[1].isEmpty()) {
                         val line2 = lore[2].stripControlCodes()
                         val enchantName =
-                            line2.substring(0, line2.lastIndexOf(" ")).replace(" ".toRegex(), "_").uppercase()
+                            line2.substringBeforeLast(" ").replace(" ", "_").uppercase()
                         itemId = "ENCHANTED_BOOK-" + enchantName + "-" + item.stackSize
                         isSuperpairsReward = true
                     }
@@ -228,8 +236,12 @@ class ItemFeatures {
             }
         }
         if (Skytils.config.showRadioactiveBonus && itemId == "TARANTULA_HELMET") {
-            val name = TabListUtils.tabEntries[68].getText()
-            val bonus = (name.substringAfter("❁").removeSuffix("§r").toInt().coerceAtMost(1000) / 10).toString()
+            val bonus = try {
+                (TabListUtils.tabEntries[68].getText().substringAfter("❁").removeSuffix("§r").toInt()
+                    .coerceAtMost(1000) / 10).toString()
+            } catch (e: Exception) {
+                "Error"
+            }
             for (i in event.toolTip.indices) {
                 val line = event.toolTip[i]
                 if (line.contains("§7Crit Damage:")) {
@@ -390,6 +402,7 @@ class ItemFeatures {
 
         init {
             SoulStrengthGuiElement()
+            SoulflowGuiElement()
         }
     }
 
@@ -402,7 +415,7 @@ class ItemFeatures {
                     val extraAttr = getExtraAttributes(item)
                     if (extraAttr != null) {
                         if (extraAttr.hasKey("ultimateSoulEaterData")) {
-                            val bonus = extraAttr.getInteger("ultimateSoulEaterData")
+                            val bonus = extraAttr.getDouble("ultimateSoulEaterData")
                             mc.fontRendererObj.drawString("§cSoul Strength: §a$bonus", 0f, 0f, 0xFFFFFF, true)
                         }
                     }
@@ -427,6 +440,66 @@ class ItemFeatures {
             get() = ScreenRenderer.fontRenderer.getStringWidth("§cSoul Strength: §a1000")
         override val toggled: Boolean
             get() = Skytils.config.showSoulEaterBonus
+
+        init {
+            Skytils.guiManager.registerElement(this)
+        }
+    }
+
+    class SoulflowGuiElement : GuiElement("Soulflow Display", FloatPair(0.65f, 0.85f)) {
+        override fun render() {
+            if (Utils.inSkyblock) {
+                for (i in Skytils.mc.thePlayer.inventory.mainInventory) {
+                    if (i == null) continue
+                    if (!i.displayName.containsAny("Soulflow Pile", "Soulflow Battery", "Soulflow Supercell")) continue
+                    for (str in getItemLore(i)) {
+                        if (!str.startsWith("§7Internalized: ")) continue
+                        if (Skytils.config.lowSoulflowPing > 0) {
+                            val soulflow = (str.substring(18).filter { it.isDigit() }).toInt()
+                            if (soulflow <= Skytils.config.lowSoulflowPing && !pinged) {
+                                GuiManager.createTitle("§cLow Soulflow", 20)
+                                pinged = true
+                            } else if (soulflow > Skytils.config.lowSoulflowPing) {
+                                pinged = false
+                            }
+                        }
+                        if (toggled) {
+                            val alignment =
+                                if (actualX < ScaledResolution(mc).scaledWidth / 2f) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
+                            ScreenRenderer.fontRenderer.drawString(
+                                str.substring(16),
+                                if (actualX < ScaledResolution(mc).scaledWidth / 2f) 0f else width.toFloat(),
+                                0f,
+                                CommonColors.WHITE,
+                                alignment,
+                                TextShadow.NORMAL
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun demoRender() {
+            val alignment =
+                if (actualX < ScaledResolution(mc).scaledWidth / 2f) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
+            ScreenRenderer.fontRenderer.drawString(
+                "§3100⸎ Soulflow",
+                if (actualX < ScaledResolution(mc).scaledWidth / 2f) 0f else width.toFloat(),
+                0f,
+                CommonColors.WHITE,
+                alignment,
+                TextShadow.NORMAL
+            )
+        }
+
+        override val height: Int
+            get() = ScreenRenderer.fontRenderer.FONT_HEIGHT
+        override val width: Int
+            get() = ScreenRenderer.fontRenderer.getStringWidth("§3100⸎ Soulflow")
+        override val toggled: Boolean
+            get() = Skytils.config.showSoulflowDisplay
+        private var pinged = false
 
         init {
             Skytils.guiManager.registerElement(this)

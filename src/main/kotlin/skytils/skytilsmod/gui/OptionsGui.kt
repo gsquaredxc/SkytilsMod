@@ -17,9 +17,10 @@
  */
 package skytils.skytilsmod.gui
 
-import club.sk1er.vigilance.VigilanceConfig
+import gg.essential.vigilance.VigilanceConfig
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.gui.commandaliases.CommandAliasesGui
@@ -28,6 +29,7 @@ import skytils.skytilsmod.gui.keyshortcuts.KeyShortcutsGui
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
+import skytils.skytilsmod.utils.openGUI
 import java.awt.Color
 import java.awt.Desktop
 import java.io.IOException
@@ -35,10 +37,16 @@ import java.net.URI
 import java.net.URISyntaxException
 
 class OptionsGui : GuiScreen() {
+
+    private var origGuiScale: Int
+
+    init {
+        origGuiScale = Skytils.mc.gameSettings.guiScale
+    }
+
     override fun doesGuiPauseGame() = false
 
     override fun initGui() {
-        super.initGui()
         buttonList.add(CleanButton(0, width / 2 - 100, height / 4 + 100, 200, 20, "Config"))
         buttonList.add(CleanButton(1, width / 2 - 100, height / 4 + 125, 200, 20, "Edit Aliases"))
         buttonList.add(CleanButton(2, width / 2 - 100, height / 4 + 150, 200, 20, "Edit Locations"))
@@ -87,11 +95,11 @@ class OptionsGui : GuiScreen() {
 
     override fun actionPerformed(button: GuiButton) {
         when (button.id) {
-            0 -> mc.displayGuiScreen(Skytils.config.gui())
+            0 -> Skytils.config.openGUI()
             1 -> mc.displayGuiScreen(CommandAliasesGui())
             2 -> mc.displayGuiScreen(LocationEditGui())
             3 -> mc.displayGuiScreen(KeyShortcutsGui())
-            4 -> mc.displayGuiScreen(VigilanceConfig.gui())
+            4 -> VigilanceConfig.openGUI()
             5 -> try {
                 Desktop.getDesktop().browse(URI("https://discord.gg/skytils"))
             } catch (ex: IOException) {
@@ -106,6 +114,24 @@ class OptionsGui : GuiScreen() {
             } catch (ex: URISyntaxException) {
                 ex.printStackTrace()
             }
+        }
+    }
+
+    override fun updateScreen() {
+        loadGuiScale(2)
+    }
+
+    override fun onGuiClosed() {
+        loadGuiScale(origGuiScale)
+    }
+
+    fun loadGuiScale(scale: Int) {
+        if (mc.gameSettings.guiScale != scale) {
+            mc.gameSettings.guiScale = scale
+            val scaledresolution = ScaledResolution(mc)
+            val j = scaledresolution.scaledWidth
+            val k = scaledresolution.scaledHeight
+            setWorldAndResolution(mc, j, k)
         }
     }
 }

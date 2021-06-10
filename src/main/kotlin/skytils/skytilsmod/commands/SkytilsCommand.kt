@@ -1,37 +1,43 @@
 /*
-* Skytils - Hypixel Skyblock Quality of Life Mod
-* Copyright (C) 2021 Skytils
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as published
-* by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Skytils - Hypixel Skyblock Quality of Life Mod
+ * Copyright (C) 2021 Skytils
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package skytils.skytilsmod.commands
 
+import kotlinx.coroutines.*
 import net.minecraft.client.entity.EntityPlayerSP
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
+import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.util.BlockPos
 import net.minecraft.util.ChatComponentText
 import skytils.skytilsmod.Skytils
+import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.features.impl.events.GriffinBurrows
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import skytils.skytilsmod.features.impl.mining.MiningFeatures
+import skytils.skytilsmod.features.impl.misc.SlayerFeatures
 import skytils.skytilsmod.gui.LocationEditGui
 import skytils.skytilsmod.gui.OptionsGui
 import skytils.skytilsmod.gui.commandaliases.CommandAliasesGui
 import skytils.skytilsmod.gui.keyshortcuts.KeyShortcutsGui
 import skytils.skytilsmod.utils.APIUtil
+import skytils.skytilsmod.utils.Utils
+import skytils.skytilsmod.utils.openGUI
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -82,7 +88,7 @@ object SkytilsCommand : CommandBase() {
                     }
                 }
             }
-            "config" -> Skytils.displayScreen = Skytils.config.gui()
+            "config" -> Skytils.config.openGUI()
             "fetchur" -> player.addChatMessage(
                 ChatComponentText(
                     "§e§l[FETCHUR] §8» §eToday's Fetchur item is: §f" + MiningFeatures.fetchurItems.values.toTypedArray()
@@ -117,7 +123,16 @@ object SkytilsCommand : CommandBase() {
                             MayorInfo.fetchJerryData()
                             player.addChatMessage(ChatComponentText("§b§l[RELOAD] §8» §bSkytils mayor data has been §freloaded§b successfully."))
                         }
-                        else -> player.addChatMessage(ChatComponentText("/skytils reload <aliases/data>"))
+                        "slayer" -> {
+                            for (entity in mc.theWorld.getEntitiesWithinAABBExcludingEntity(
+                                mc.thePlayer,
+                                mc.thePlayer.entityBoundingBox.expand(5.0, 3.0, 5.0)
+                            )) {
+                                if (entity is EntityArmorStand) continue
+                                SlayerFeatures.processSlayerEntity(entity)
+                            }
+                        }
+                        else -> player.addChatMessage(ChatComponentText("/skytils reload <aliases/data/slayer>"))
                     }
                 }
                 if (args.size == 1) {
@@ -131,7 +146,7 @@ object SkytilsCommand : CommandBase() {
                                   §3/skytils config §l➡ §bOpens the configuration GUI.
                                   §3/skytils setkey §l➡ §bSets your Hypixel API key.
                                   §3/skytils help §l➡ §bShows this help menu.
-                                  §3/skytils reload <data/mayor> §l➡ §bForces a refresh of solutions from the data repository.
+                                  §3/skytils reload <data/mayor/slayer> §l➡ §bForces a refresh of data.
                                   §3/skytils editlocations §l➡ §bOpens the location editing GUI.
                                   §3/skytils aliases §l➡ §bOpens the command alias editing GUI.
                                  §9§l➜ Events:
@@ -165,6 +180,19 @@ object SkytilsCommand : CommandBase() {
                 sender,
                 args.copyOfRange(1, args.size)
             )
+            "swaphub" -> {
+                if (Utils.inSkyblock) {
+                    Skytils.sendMessageQueue.add("/warpforge")
+                    CoroutineScope(Dispatchers.Default).launch {
+                        delay(500)
+                        Skytils.sendMessageQueue.add("/warp hub")
+                    }
+                }
+            }
+            "debug" -> {
+                Skytils.config.debugMode = !Skytils.config.debugMode
+                player.addChatComponentMessage(ChatComponentText("§c§lSkytils ➜ §cDebug mode was toggled to: §6${Skytils.config.debugMode}"))
+            }
             else -> player.addChatMessage(ChatComponentText("§c§lSkytils ➜ §cThis command doesn't exist!\n §cUse §f/skytils help§c for a full list of commands"))
         }
     }

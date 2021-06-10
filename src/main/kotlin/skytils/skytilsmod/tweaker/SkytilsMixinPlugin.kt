@@ -32,6 +32,10 @@ class SkytilsMixinPlugin : IMixinConfigPlugin {
     }
 
     override fun shouldApplyMixin(targetClassName: String, mixinClassName: String): Boolean {
+        if (!mixinClassName.startsWith("skytils.skytilsmod.mixins")) {
+            println("Mixin $mixinClassName for $targetClassName is foreign, disabling.")
+            return false
+        }
         return true
     }
 

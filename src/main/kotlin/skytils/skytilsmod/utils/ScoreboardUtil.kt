@@ -29,24 +29,15 @@ import skytils.skytilsmod.Skytils.Companion.mc
  */
 object ScoreboardUtil {
     @JvmStatic
-    fun cleanSB(scoreboard: String?): String {
-        val nvString = scoreboard.stripControlCodes().toCharArray()
-        val cleaned = StringBuilder()
-        for (c in nvString) {
-            if (c.code in 21..126) {
-                cleaned.append(c)
-            }
-        }
-        return cleaned.toString()
+    fun cleanSB(scoreboard: String): String {
+        return scoreboard.stripControlCodes().toCharArray().filter { it.code in 21..126 }.joinToString(separator = "")
     }
 
     @JvmStatic
     val sidebarLines: List<String>
         get() {
-            val lines: MutableList<String> = ArrayList()
-            val world = mc.theWorld ?: return lines
-            val scoreboard = world.scoreboard ?: return lines
-            val objective = scoreboard.getObjectiveInDisplaySlot(1) ?: return lines
+            val scoreboard = mc.theWorld?.scoreboard ?: return emptyList()
+            val objective = scoreboard.getObjectiveInDisplaySlot(1) ?: return emptyList()
             var scores = scoreboard.getSortedScores(objective)
             val list = scores.filter { input: Score? ->
                 input != null && input.playerName != null && !input.playerName
@@ -57,10 +48,9 @@ object ScoreboardUtil {
             } else {
                 list
             }
-            for (score in scores) {
-                val team = scoreboard.getPlayersTeam(score.playerName)
-                lines.add(ScorePlayerTeam.formatPlayerName(team, score.playerName))
+            return scores.map {
+                val team = scoreboard.getPlayersTeam(it.playerName)
+                ScorePlayerTeam.formatPlayerName(team, it.playerName)
             }
-            return lines
         }
 }

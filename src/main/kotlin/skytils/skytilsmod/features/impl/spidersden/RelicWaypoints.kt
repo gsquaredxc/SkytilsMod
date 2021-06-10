@@ -17,7 +17,6 @@
  */
 package skytils.skytilsmod.features.impl.spidersden
 
-import com.google.common.collect.ImmutableSet
 import com.google.gson.JsonArray
 import com.google.gson.JsonPrimitive
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
@@ -35,6 +34,7 @@ import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.PersistentSave
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.events.PacketEvent.SendEvent
+import skytils.skytilsmod.utils.ConcurrentHashSet
 import skytils.skytilsmod.utils.RenderUtil
 import java.awt.Color
 import java.io.File
@@ -86,7 +86,7 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
         val (viewerX, viewerY, viewerZ) = RenderUtil.getViewerPos(event.partialTicks)
 
         if (Skytils.config.relicWaypoints) {
-            for (relic in ImmutableSet.copyOf(relicLocations)) {
+            for (relic in relicLocations) {
                 if (foundRelics.contains(relic)) continue
                 val x = relic.x - viewerX
                 val y = relic.y - viewerY
@@ -112,7 +112,7 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
             }
         }
         if (Skytils.config.rareRelicFinder) {
-            for (relic in ImmutableSet.copyOf(rareRelicLocations)) {
+            for (relic in rareRelicLocations) {
                 val x = relic.x - viewerX
                 val y = relic.y - viewerY
                 val z = relic.z - viewerZ
@@ -164,8 +164,8 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
     }
 
     companion object {
-        val relicLocations = LinkedHashSet<BlockPos>()
-        val foundRelics = HashSet<BlockPos>()
-        private val rareRelicLocations = HashSet<BlockPos>()
+        val relicLocations = ConcurrentHashSet<BlockPos>()
+        val foundRelics = ConcurrentHashSet<BlockPos>()
+        private val rareRelicLocations = ConcurrentHashSet<BlockPos>()
     }
 }

@@ -18,7 +18,6 @@
 
 package skytils.skytilsmod.listeners
 
-import io.netty.util.internal.ConcurrentSet
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.util.ChatComponentText
@@ -30,17 +29,20 @@ import skytils.skytilsmod.commands.RepartyCommand
 import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.events.PacketEvent
 import skytils.skytilsmod.features.impl.dungeons.DungeonTimer
+import skytils.skytilsmod.features.impl.handlers.CooldownTracker
+import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.NumberUtil.addSuffix
 import skytils.skytilsmod.utils.TabListUtils
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.getText
 import skytils.skytilsmod.utils.stripControlCodes
+import skytils.skytilsmod.utils.NumberUtil.romanToDecimal
 
 object DungeonListener {
 
-    val team = ConcurrentSet<DungeonTeammate>()
-    val deads = ConcurrentSet<DungeonTeammate>()
-    val missingPuzzles = ConcurrentSet<String>()
+    val team = ConcurrentHashSet<DungeonTeammate>()
+    val deads = ConcurrentHashSet<DungeonTeammate>()
+    val missingPuzzles = ConcurrentHashSet<String>()
 
     private val partyCountPattern = Regex("§r {9}§r§b§lParty §r§f\\(([1-5])\\)§r")
     private val classPattern =
@@ -101,7 +103,7 @@ object DungeonListener {
     }
 
     @SubscribeEvent
-    fun onRecieve(event: PacketEvent.ReceiveEvent) {
+    fun onPacket(event: PacketEvent.ReceiveEvent) {
         if (!Utils.inDungeons) return
         if (!Skytils.config.boxedTanks && !Skytils.config.showTankRadius && !Skytils.config.boxedProtectedTeammates && !Skytils.config.dungeonDeathCounter && !Skytils.config.autoRepartyOnDungeonEnd && !Skytils.config.spiritLeapNames) return
         if (event.packet is S02PacketChat) {
@@ -159,7 +161,7 @@ object DungeonListener {
             }
             val name = matcher.groups["name"]!!.value
             val dungeonClass = matcher.groups["class"]!!.value
-            val classLevel = matcher.groups["lvl"]!!.value
+            val classLevel = matcher.groups["lvl"]!!.value.romanToDecimal()
             println("Parsed teammate $name, they are a $dungeonClass $classLevel")
             team.add(
                 DungeonTeammate(
@@ -171,12 +173,13 @@ object DungeonListener {
                 )
             )
         }
+        CooldownTracker.updateCooldownReduction()
     }
 
     class DungeonTeammate(
         val playerName: String,
         val dungeonClass: DungeonClass,
-        val classLevel: String,
+        val classLevel: Int,
         val tabEntryIndex: Int
     ) {
         var player: EntityPlayer? = null

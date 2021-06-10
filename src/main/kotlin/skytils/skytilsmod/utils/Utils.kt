@@ -17,17 +17,21 @@
  */
 package skytils.skytilsmod.utils
 
+import gg.essential.vigilance.Vigilant
+import io.netty.util.internal.ConcurrentSet
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.inventory.GuiContainer
 import net.minecraft.entity.EntityLivingBase
+import net.minecraft.entity.SharedMonsterAttributes
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.server.S02PacketChat
-import net.minecraft.util.BlockPos
+import net.minecraft.util.*
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper
+import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.utils.graphics.colors.ColorFactory.web
 import skytils.skytilsmod.utils.graphics.colors.CustomColor
@@ -38,6 +42,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.*
+import java.util.concurrent.Future
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -108,13 +113,12 @@ object Utils {
      */
     fun checkForDungeons() {
         if (inSkyblock) {
-            val scoreboard = ScoreboardUtil.sidebarLines
-            for (s in scoreboard) {
-                val sCleaned = ScoreboardUtil.cleanSB(s)
-                if (sCleaned.contains("The Catacombs") && !sCleaned.contains("Queue") || sCleaned.contains("Dungeon Cleared:")) {
-                    inDungeons = true
-                    return
-                }
+            if (ScoreboardUtil.sidebarLines.any {
+                    val sCleaned = ScoreboardUtil.cleanSB(it)
+                    sCleaned.contains("The Catacombs") && !sCleaned.contains("Queue") || sCleaned.contains("Dungeon Cleared:")
+                }) {
+                inDungeons = true
+                return
             }
         }
         inDungeons = false
@@ -186,6 +190,11 @@ object Utils {
 
     private fun getCustomColorFromColor(color: Color) = CustomColor.fromInt(color.rgb)
 
+    fun checkThreadAndQueue(run: () -> Unit) {
+        if (!mc.isCallingFromMinecraftThread) {
+            mc.addScheduledTask(run)
+        } else run()
+    }
 
     /**
      * Cancels a chat packet and posts the chat event to the event bus if other mods need it
@@ -195,7 +204,9 @@ object Utils {
         if (ReceivePacketEvent.packet !is S02PacketChat) return
         ReceivePacketEvent.isCanceled = true
         val packet = ReceivePacketEvent.packet
-        MinecraftForge.EVENT_BUS.post(ClientChatReceivedEvent(packet.type, packet.chatComponent))
+        checkThreadAndQueue {
+            MinecraftForge.EVENT_BUS.post(ClientChatReceivedEvent(packet.type, packet.chatComponent))
+        }
     }
 
     fun timeFormat(seconds: Double): String {
@@ -223,4 +234,45 @@ object Utils {
         }
         return java
     }
+
+    fun checkBossName(floor: String, bossName: String): Boolean {
+        val correctBoss = when (floor) {
+            "E" -> "The Watcher"
+            "F1", "M1" -> "Bonzo"
+            "F2", "M2" -> "Scarf"
+            "F3", "M3" -> "The Professor"
+            "F4", "M4" -> "Thorn"
+            "F5", "M5" -> "Livid"
+            "F6", "M6" -> "Sadan"
+            "F7", "M7" -> "Necron"
+            else -> null
+        } ?: return false
+
+        // Livid has a prefix in front of the name, so we check ends with to cover all the livids
+        return bossName.endsWith(correctBoss)
+    }
+
+    fun printDebugMessage(component: IChatComponent) {
+        if (Skytils.config.debugMode) mc.ingameGUI.chatGUI.printChatMessage(component)
+    }
+
+    fun printDebugMessage(string: String) {
+        if (Skytils.config.debugMode) mc.ingameGUI.chatGUI.printChatMessage(ChatComponentText(string))
+    }
+
+
 }
+
+typealias ConcurrentHashSet<T> = ConcurrentSet<T>
+
+val AxisAlignedBB.minVec: Vec3
+    get() = Vec3(minX, minY, minZ)
+val AxisAlignedBB.maxVec: Vec3
+    get() = Vec3(maxX, maxY, maxZ)
+
+fun Vigilant.openGUI(): Future<*> = Skytils.threadPool.submit {
+    Skytils.displayScreen = this.gui()
+}
+
+val EntityLivingBase.baseMaxHealth: Double
+    get() = this.getEntityAttribute(SharedMonsterAttributes.maxHealth).baseValue

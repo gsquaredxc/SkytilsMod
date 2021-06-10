@@ -17,15 +17,15 @@
  */
 
 plugins {
-    id "net.minecraftforge.gradle.forge" version "b13624"
+    id "net.minecraftforge.gradle.forge" version "6f5327"
     id "com.github.johnrengelman.shadow" version "6.1.0"
-    id "org.jetbrains.kotlin.jvm" version "1.5.0"
+    id "org.jetbrains.kotlin.jvm" version "1.5.10"
     id "org.spongepowered.mixin" version "d5f9873d60"
 }
 
-ext.kotlin_version = "1.5.0"
+ext.kotlin_version = "1.5.10"
 
-version = "1.0-pre9"
+version = "1.0-pre13.1"
 group = "skytils.skytilsmod"
 archivesBaseName = "Skytils"
 
@@ -68,16 +68,11 @@ repositories {
 dependencies {
     implementation("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
         transitive = false
-        exclude module: "guava"
-        exclude module: "commons-io"
-        exclude module: "gson"
-        exclude module: "launchwrapper"
-        exclude module: "log4j-core"
     }
 
     annotationProcessor("org.spongepowered:mixin:0.7.11-SNAPSHOT")
 
-    implementation("club.sk1er:Vigilance:105-10809-SNAPSHOT") {
+    implementation("gg.essential:Vigilance:115-10809-SNAPSHOT") {
         exclude module: "kotlin-reflect"
         exclude module: "kotlin-stdlib-jdk8"
     }
@@ -87,7 +82,7 @@ dependencies {
 
     compile "com.github.gsquaredxc:hyskyAPI:main-SNAPSHOT"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
 }
 
 jar {
@@ -109,7 +104,7 @@ shadowJar {
     archiveFileName = jar.archiveFileName
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    relocate("club.sk1er", "skytils.sk1er")
+    relocate("gg.essential", "skytils.essentialgg")
     relocate("kotlinx.coroutines", "skytils.kotlinx.coroutines")
 
     exclude "LICENSE.txt"
@@ -124,7 +119,6 @@ shadowJar {
     exclude "com/jcraft/**"
     exclude "org/lwjgl/**"
     exclude "net/java/**"
-    exclude "club/sk1er/vigilance/example"
 
     exclude "com/gsquaredxc/hyskyAPI/**"
     exclude "org/reflections/**"
@@ -138,6 +132,7 @@ shadowJar {
     exclude "META-INF/versions/**"
     exclude "META-INF/com.android.tools/**"
 
+    exclude "fabric.mod.json"
 }
 
 processResources {
@@ -175,6 +170,7 @@ reobf {
 sourceSets {
     main {
         ext.refMap = "mixins.skytils.refmap.json"
+        output.resourcesDir = file("${buildDir}/classes/kotlin/main")
     }
 }
 

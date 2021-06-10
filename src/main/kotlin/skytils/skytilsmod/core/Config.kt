@@ -1,27 +1,27 @@
 /*
-* Skytils - Hypixel Skyblock Quality of Life Mod
-* Copyright (C) 2021 Skytils
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as published
-* by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Skytils - Hypixel Skyblock Quality of Life Mod
+ * Copyright (C) 2021 Skytils
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package skytils.skytilsmod.core
 
-import club.sk1er.vigilance.Vigilant
-import club.sk1er.vigilance.data.Category
-import club.sk1er.vigilance.data.Property
-import club.sk1er.vigilance.data.PropertyType
-import club.sk1er.vigilance.data.SortingBehavior
+import gg.essential.vigilance.Vigilant
+import gg.essential.vigilance.data.Category
+import gg.essential.vigilance.data.Property
+import gg.essential.vigilance.data.PropertyType
+import gg.essential.vigilance.data.SortingBehavior
 import com.gsquaredxc.hyskyAPI.StateRegister.StateRegisters
 import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
@@ -29,7 +29,6 @@ import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.dungeonFeatures
 import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
-import skytils.skytilsmod.utils.ConfigUtil
 import java.awt.Color
 import java.io.File
 
@@ -60,7 +59,7 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         description = "Your Hypixel API key, which can be obtained from /api new. Required for some features.",
         category = "General",
         subcategory = "API",
-        protected = true
+        protectedText = true
     )
     var apiKey = ""
 
@@ -92,6 +91,16 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Other"
     )
     var configButtonOnPause = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Debug Mode",
+        description = "Will do weird things to your game. You probably don't want this on.",
+        category = "General",
+        subcategory = "Other",
+        hidden = true
+    )
+    var debugMode = false
 
     @Property(
         type = PropertyType.SWITCH,
@@ -211,6 +220,16 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Score Calculation"
     )
     var showScoreCalculation = false
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Score Calculation Method",
+        description = "New method requires Dungeon Rooms Mod version 2.",
+        category = "Dungeons",
+        subcategory = "Score Calculation",
+        options = arrayOf("Old", "New")
+    )
+    var scoreCalculationMethod = 0
 
     @Property(
         type = PropertyType.SWITCH,
@@ -1155,6 +1174,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
     var itemDropScale = 1f
 
     @Property(
+        type = PropertyType.SWITCH,
+        name = "Item Cooldown Display",
+        description = "Displays the cooldowns for your items.",
+        category = "Miscellaneous",
+        subcategory = "Items"
+    )
+    var itemCooldownDisplay = false
+
+    @Property(
         type = PropertyType.DECIMAL_SLIDER,
         name = "Larger Heads",
         description = "Change the size of heads in your inventory.",
@@ -1201,6 +1229,15 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Items"
     )
     var showEnchantedBookTier = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Show Etherwarp Teleport Position",
+        description = "Shows the block you will teleport to with the Etherwarp Transmission ability.",
+        category = "Miscellaneous",
+        subcategory = "Items"
+    )
+    var showEtherwarpTeleportPos = false
 
     @Property(
         type = PropertyType.SWITCH,
@@ -1659,6 +1696,16 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
 
     @Property(
         type = PropertyType.SWITCH,
+        name = "Lower Enderman Nametags",
+        description = "Lowers the health and nametag of endermen so it's easier to see.",
+        category = "Miscellaneous",
+        subcategory = "Quality of Life"
+    )
+    @JvmField
+    var lowerEndermanNametags = false
+
+    @Property(
+        type = PropertyType.SWITCH,
         name = "Dolphin Pet Display",
         description = "Shows the players within the range of the Dolphin pet.",
         category = "Pets",
@@ -1740,6 +1787,50 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
     var petItemConfirmation = false
 
     @Property(
+        type = PropertyType.DECIMAL_SLIDER,
+        name = "Current Revenant RNG Meter",
+        description = "Internal value to store current Revenant RNG meter",
+        category = "Slayer",
+        decimalPlaces = 1,
+        maxF = 100f,
+        hidden = true
+    )
+    var revRNG = 0f
+
+    @Property(
+        type = PropertyType.DECIMAL_SLIDER,
+        name = "Current Tarantula RNG Meter",
+        description = "Internal value to store current Tarantula RNG meter",
+        category = "Slayer",
+        decimalPlaces = 1,
+        maxF = 100f,
+        hidden = true
+    )
+    var taraRNG = 0f
+
+    @Property(
+        type = PropertyType.DECIMAL_SLIDER,
+        name = "Current Sven RNG Meter",
+        description = "Internal value to store current Sven RNG meter",
+        category = "Slayer",
+        decimalPlaces = 1,
+        maxF = 100f,
+        hidden = true
+    )
+    var svenRNG = 0f
+
+    @Property(
+        type = PropertyType.DECIMAL_SLIDER,
+        name = "Current Voidgloom RNG Meter",
+        description = "Internal value to store current Voidgloom Seraph RNG meter",
+        category = "Slayer",
+        decimalPlaces = 1,
+        maxF = 100f,
+        hidden = true
+    )
+    var voidRNG = 0f
+
+    @Property(
         type = PropertyType.SWITCH,
         name = "Ping when in Atoned Horror Danger Zone",
         description = "Pings when you are standing on the Atoned Horror's TNT target.",
@@ -1765,6 +1856,109 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         subcategory = "Quality of Life"
     )
     var slayerMinibossSpawnAlert = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Show RNGesus Meter",
+        description = "Shows your current RNGesus meter as the boss bar.",
+        category = "Slayer",
+        subcategory = "Quality of Life"
+    )
+    var showRNGMeter = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Show Slayer Armor Kills",
+        description = "Displays the kills on your Final Destination Armor.",
+        category = "Slayer",
+        subcategory = "Quality of Life"
+    )
+    var showSlayerArmorKills = false
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Show Slayer Display",
+        description = "Shows your current slayer's health and the time left",
+        category = "Slayer",
+        subcategory = "Quality of Life"
+    )
+    var showSlayerDisplay = false
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Show Seraph Display",
+        description = "§b[WIP] §rShows info about your current Voidgloom Seraph boss.",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var showSeraphDisplay = false
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Yang Glyph Ping",
+        description = "Alerts you when the Voidgloom Seraph throws down a Yang Glyph(beacon).",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var yangGlyphPing = false
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Highlight Yang Glyph",
+        description = "Highlights the Yang Glyph block.",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var highlightYangGlyph = false
+
+    @Property(
+        PropertyType.COLOR,
+        name = "Yang Glyph Highlight Color",
+        description = "Changes the color for the Yang Glyph block",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var yangGlyphColor = Color(65, 102, 245, 128)
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Highlight Nukekebi Fixation Heads",
+        description = "Draws the hitbox of Nukekebi Fixation heads",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var highlightNukekebiHeads = false
+
+    @Property(
+        PropertyType.COLOR,
+        name = "Nukekebi Fixation Head Color",
+        description = "Changes the color for the Nukekebi Fixation Head Highlight",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var nukekebiHeadColor = Color(65, 102, 245, 128)
+
+    @Property(
+        PropertyType.SWITCH,
+        name = "Show Soulflow Display",
+        description = "Shows your current internalized soulflow.\n" +
+                "§cRequires your Soulflow battery to be in your inventory.",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph"
+    )
+    var showSoulflowDisplay = false
+
+    @Property(
+        PropertyType.NUMBER,
+        name = "Low Soulflow Ping",
+        description = "Alerts you when your soulflow is low.\n" +
+                "§cRequires your Soulflow battery to be in your inventory.",
+        category = "Slayer",
+        subcategory = "Voidgloom Seraph",
+        min = 0,
+        max = 500
+    )
+    var lowSoulflowPing = 0
 
     @Property(
         type = PropertyType.SWITCH,
@@ -1871,6 +2065,16 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         options = ["Normal", "Hidden", "Separate GUI"]
     )
     var hopeHider = 0
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Mining ability hider",
+        description = "Removes Mining ability messages from your chat.",
+        category = "Spam",
+        subcategory = "Abilities",
+        options = ["Normal", "Hidden", "Separate GUI"]
+    )
+    var miningAbilityHider = 0
 
     @Property(
         type = PropertyType.SELECTOR,
@@ -2161,6 +2365,56 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
     )
     var blessedBaitHider = 0
 
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Sea Creature Catch Hider",
+        description = "Removes regular sea creature catch messages from fishing.",
+        category = "Spam",
+        subcategory = "Fishing",
+        options = ["Normal", "Hidden", "Separate GUI"]
+    )
+    var scCatchHider = 0
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Legendary Sea Creature Catch Hider",
+        description = "Removes legendary sea creature catch messages from fishing.",
+        category = "Spam",
+        subcategory = "Fishing",
+        options = ["Normal", "Hidden", "Separate GUI"]
+    )
+    var legendaryScCatchHider = 0
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Good Fishing Treasure Hider",
+        description = "Removes good catch messages from fishing.",
+        category = "Spam",
+        subcategory = "Fishing",
+        options = ["Normal", "Hidden", "Separate GUI"]
+    )
+    var goodTreasureHider = 0
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Great Fishing Treasure Hider",
+        description = "Removes great catch messages from fishing.",
+        category = "Spam",
+        subcategory = "Fishing",
+        options = ["Normal", "Hidden", "Separate GUI"]
+    )
+    var greatTreasureHider = 0
+
+    @Property(
+        type = PropertyType.SELECTOR,
+        name = "Compact Hider",
+        description = "Removes Compact messages from mining.",
+        category = "Spam",
+        subcategory = "Miscellaneous",
+        options = ["Normal", "Hidden", "Separate GUI"]
+    )
+    var compactHider = 0
+
     init {
         initialize()
 
@@ -2200,6 +2454,9 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         ::tankRadiusDisplayColor dependsOn ::showTankRadius
         ::boxedTankColor dependsOn ::boxedTanks
         ::boxedProtectedTeammatesColor dependsOn ::boxedProtectedTeammates
+
+        ::yangGlyphColor dependsOn ::highlightYangGlyph
+        ::nukekebiHeadColor dependsOn ::highlightNukekebiHeads
 
         registerListener(::protectItemBINThreshold) {
             val numeric = it.replace(Regex("[^0-9]"), "")

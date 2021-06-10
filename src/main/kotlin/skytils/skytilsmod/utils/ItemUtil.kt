@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.utils
 
+import net.minecraft.init.Items
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
@@ -26,7 +27,7 @@ import java.util.*
 object ItemUtil {
     private val RARITY_PATTERN = "(§[0-9a-f]§l§ka§r )?([§0-9a-fk-or]+)(?<rarity>[A-Z]+)".toRegex()
     private val PET_PATTERN = "§7\\[Lvl \\d+] (?<color>§[0-9a-fk-or]).+".toRegex()
-    private const val NBT_INTEGER = 3
+    const val NBT_INTEGER = 3
     private const val NBT_STRING = 8
     private const val NBT_LIST = 9
     private const val NBT_COMPOUND = 10
@@ -205,5 +206,12 @@ object ItemUtil {
 
         item.tagCompound = nbtTag
         return item
+    }
+
+    fun getSkullTexture(item: ItemStack): String? {
+        if (item.item != Items.skull) return null
+        val nbt = item.tagCompound
+        if (!nbt.hasKey("SkullOwner")) return null
+        return nbt.getCompoundTag("SkullOwner").getCompoundTag("Properties").getTagList("textures", Constants.NBT.TAG_COMPOUND).getCompoundTagAt(0).getString("Value")
     }
 }

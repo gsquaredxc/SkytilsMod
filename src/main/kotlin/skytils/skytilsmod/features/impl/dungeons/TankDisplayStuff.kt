@@ -32,7 +32,7 @@ import skytils.skytilsmod.utils.bindColor
 class TankDisplayStuff {
 
     @SubscribeEvent
-    fun onRenderEvent(event: RenderWorldLastEvent) {
+    fun onRenderWorld(event: RenderWorldLastEvent) {
         if (!Utils.inDungeons) return
         for (teammate in DungeonListener.team) {
             val player = teammate.player ?: continue

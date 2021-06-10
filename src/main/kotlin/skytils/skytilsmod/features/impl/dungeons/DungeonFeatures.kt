@@ -17,8 +17,6 @@
  */
 package skytils.skytilsmod.features.impl.dungeons
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import com.gsquaredxc.hyskyAPI.annotations.EventListener
 import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.events.packets.TitleInEvent
@@ -45,19 +43,21 @@ import net.minecraft.inventory.ContainerChest
 import net.minecraft.item.Item
 import net.minecraft.network.play.server.S29PacketSoundEffect
 import net.minecraft.potion.Potion
+import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
 import net.minecraft.util.ChatComponentText
+import net.minecraft.util.EnumChatFormatting
 import net.minecraft.world.World
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.client.event.RenderLivingEvent
+import net.minecraftforge.client.event.RenderPlayerEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.BossBarEvent
@@ -66,13 +66,13 @@ import skytils.skytilsmod.events.GuiContainerEvent.SlotClickEvent
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.events.SendChatMessageEvent
 import skytils.skytilsmod.listeners.DungeonListener
-import skytils.skytilsmod.mixins.AccessorEnumDyeColor
 import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import java.awt.Color
+import java.util.concurrent.Future
 import java.util.regex.Pattern
 
 class DungeonFeatures {
@@ -111,7 +111,8 @@ class DungeonFeatures {
         private var rerollClicks = 0
         private var foundLivid = false
         private var livid: Entity? = null
-        private var active = false
+        private var lividTag: Entity? = null
+        private var lividJob: Future<*>? = null
 
         init {
             LividGuiElement()
@@ -125,7 +126,7 @@ class DungeonFeatures {
             for (s in ScoreboardUtil.sidebarLines) {
                 val line = ScoreboardUtil.cleanSB(s)
                 if (line.contains("The Catacombs (")) {
-                    dungeonFloor = line.substring(line.indexOf("(") + 1, line.indexOf(")"))
+                    dungeonFloor = line.substringAfter("(").substringBefore(")")
                     break
                 }
             }
@@ -154,39 +155,76 @@ class DungeonFeatures {
             if (Utils.equalsOneOf(dungeonFloor, "F5", "M5")) {
                 when (Skytils.config.lividFinderType) {
                     1 -> {
-                        val loadedLivids: MutableList<Entity> = ArrayList()
-                        val entities = mc.theWorld.getLoadedEntityList()
-                        for (entity in entities) {
-                            val name = entity.name
-                            if (name.contains("Livid") && name.length > 5 && name[1] == name[5] && !loadedLivids.contains(
-                                    entity
-                                )
-                            ) {
-                                loadedLivids.add(entity)
-                            }
+                        val loadedLivids = mc.theWorld.loadedEntityList.filter {
+                            val name = it.name
+                            name.contains("Livid") && name.length > 5 && name[1] == name[5]
                         }
                         if (loadedLivids.size > 8) {
-                            livid = loadedLivids[0]
+                            lividTag = loadedLivids[0]
+                            val aabb = AxisAlignedBB(
+                                    lividTag!!.posX - 0.5,
+                                    lividTag!!.posY - 2,
+                                    lividTag!!.posZ - 0.5,
+                                    lividTag!!.posX + 0.5,
+                                    lividTag!!.posY,
+                                    lividTag!!.posZ + 0.5
+                            )
+                            livid = mc.theWorld.loadedEntityList.find {
+                                val coll = it.entityBoundingBox ?: return@find false
+                                return@find it is EntityOtherPlayerMP && it.name.endsWith(" Livid") && aabb.isVecInside(
+                                        coll.minVec
+                                ) && aabb.isVecInside(
+                                        coll.maxVec
+                                )
+                            }
                             foundLivid = true
                         }
                     }
                     0 -> {
-                        if (hasBossSpawned && mc.thePlayer.isPotionActive(Potion.blindness) && !active) {
-                            Skytils.threadPool.submit {
+                        if (hasBossSpawned && mc.thePlayer.isPotionActive(Potion.blindness) && (lividJob == null || lividJob?.isCancelled == true || lividJob?.isDone == true)) {
+                            lividJob = Skytils.threadPool.submit {
                                 while (mc.thePlayer.isPotionActive(Potion.blindness)) {
                                     Thread.sleep(10)
                                 }
                                 val state = mc.theWorld.getBlockState(BlockPos(205, 109, 242))
-                                val a = (state.getValue(BlockStainedGlass.COLOR) as AccessorEnumDyeColor).chatColor
+                                val a = when (state.getValue(BlockStainedGlass.COLOR).name.lowercase()) {
+                                    "white" -> EnumChatFormatting.WHITE
+                                    "pink" -> EnumChatFormatting.LIGHT_PURPLE
+                                    "red" -> EnumChatFormatting.RED
+                                    "silver" -> EnumChatFormatting.GRAY
+                                    "gray" -> EnumChatFormatting.GRAY
+                                    "green" -> EnumChatFormatting.DARK_GREEN
+                                    "lime" -> EnumChatFormatting.GREEN
+                                    "blue" -> EnumChatFormatting.BLUE
+                                    "purple" -> EnumChatFormatting.DARK_PURPLE
+                                    "yellow" -> EnumChatFormatting.YELLOW
+                                    else -> null
+                                }
+                                if (a == null) return@submit
                                 for (entity in mc.theWorld.loadedEntityList) {
                                     if (entity.name.startsWith("$a﴾ $a§lLivid")) {
-                                        livid = entity
+                                        lividTag = entity
+                                        val aabb = AxisAlignedBB(
+                                                lividTag!!.posX - 0.5,
+                                                lividTag!!.posY - 2,
+                                                lividTag!!.posZ - 0.5,
+                                                lividTag!!.posX + 0.5,
+                                                lividTag!!.posY,
+                                                lividTag!!.posZ + 0.5
+                                        )
+                                        livid = mc.theWorld.loadedEntityList.find {
+                                            val coll = it.entityBoundingBox ?: return@find false
+                                            return@find it is EntityOtherPlayerMP && it.name.endsWith(" Livid") && aabb.isVecInside(
+                                                    coll.minVec
+                                            ) && aabb.isVecInside(
+                                                    coll.maxVec
+                                            )
+                                        }
                                         foundLivid = true
                                         break
                                     }
                                 }
                             }
-                            active = false
                         }
                     }
                 }
@@ -272,10 +310,15 @@ class DungeonFeatures {
             }
             if (Skytils.config.hideF4Spam && unformatted.startsWith("[CROWD]")) event.isCanceled = true
             if (unformatted.startsWith("[BOSS]") && unformatted.contains(":")) {
-                if (!unformatted.startsWith("[BOSS] The Watcher")) {
+                val bossName = unformatted.substringAfter("[BOSS] ").substringBefore(":").trim()
+                if (!hasBossSpawned && bossName != "The Watcher" && dungeonFloor != null && Utils.checkBossName(
+                        dungeonFloor!!,
+                        bossName
+                    )
+                ) {
                     hasBossSpawned = true
                 }
-                if (unformatted.contains("Sadan")) {
+                if (bossName == "Sadan") {
                     if (unformatted.contains("So you made it all the way here")) isInTerracottaPhase = true
                     if (unformatted.contains("ENOUGH!") || unformatted.contains("It was inevitable.")) isInTerracottaPhase =
                         false
@@ -346,15 +389,55 @@ class DungeonFeatures {
                 }
             }
             if (event.entity is EntityBat && Skytils.config.showBatHitboxes && !hasBossSpawned && event.entity.maxHealth == 100f && !mc.renderManager.isDebugBoundingBox && !event.entity.isInvisible) {
-                RenderUtil.drawOutlinedBoundingBox(event.entity.entityBoundingBox, Color(0, 255, 255, 255), 3f, 1f)
+                RenderUtil.drawOutlinedBoundingBox(
+                    event.entity.entityBoundingBox,
+                    Color(0, 255, 255, 255),
+                    3f,
+                    RenderUtil.getPartialTicks()
+                )
             }
             if (event.entity is EntitySkeleton && Skytils.config.boxSkeletonMasters && !mc.renderManager.isDebugBoundingBox && !event.entity.isInvisible && ItemUtil.getSkyBlockItemID(
                     event.entity.getCurrentArmor(0)
                 ) == "SKELETON_MASTER_BOOTS"
             ) {
-                RenderUtil.drawOutlinedBoundingBox(event.entity.entityBoundingBox, Color(255, 107, 11, 255), 3f, 1f)
+                RenderUtil.drawOutlinedBoundingBox(
+                    event.entity.entityBoundingBox,
+                    Color(255, 107, 11, 255),
+                    3f,
+                    RenderUtil.getPartialTicks()
+                )
+            }
+            if (event.entity == lividTag) {
+                val aabb = AxisAlignedBB(
+                    event.entity.posX - 0.5,
+                    event.entity.posY - 2,
+                    event.entity.posZ - 0.5,
+                    event.entity.posX + 0.5,
+                    event.entity.posY,
+                    event.entity.posZ + 0.5
+                )
+                RenderUtil.drawOutlinedBoundingBox(
+                    aabb,
+                    Color(255, 107, 11, 255),
+                    3f,
+                    RenderUtil.getPartialTicks()
+                )
             }
         }
+    }
+
+    @SubscribeEvent
+    fun onRenderPlayerPre(event: RenderPlayerEvent.Pre) {
+        if (livid != null && event.entityPlayer != livid && event.entityPlayer.uniqueID.version() != 4) {
+            GlStateManager.enableBlend()
+            GlStateManager.color(1f, 1f, 1f, 0.3f)
+        }
+    }
+
+    @SubscribeEvent
+    fun onRenderPlayerPost(event: RenderPlayerEvent.Post) {
+        GlStateManager.color(1f, 1f, 1f, 1f)
+        GlStateManager.disableBlend()
     }
 
     // Spirit leap names
@@ -527,11 +610,12 @@ class DungeonFeatures {
     }
 
     @SubscribeEvent
-    fun onWorldChange(event: WorldEvent.Load?) {
+    fun onWorldChange(event: WorldEvent.Load) {
         dungeonFloor = null
         hasBossSpawned = false
         isInTerracottaPhase = false
         terracottaEndTime = -1.0
+        lividTag = null
         livid = null
         foundLivid = false
     }
@@ -541,12 +625,12 @@ class DungeonFeatures {
             val player = mc.thePlayer
             val world: World? = mc.theWorld
             if (toggled && Utils.inDungeons && player != null && world != null) {
-                if (livid == null) return
+                if (lividTag == null) return
                 val sr = ScaledResolution(Minecraft.getMinecraft())
                 val leftAlign = actualX < sr.scaledWidth / 2f
                 val alignment = if (leftAlign) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
                 ScreenRenderer.fontRenderer.drawString(
-                    livid!!.name.replace("§l", ""),
+                    lividTag!!.name.replace("§l", ""),
                     if (leftAlign) 0f else width.toFloat(),
                     0f,
                     CommonColors.WHITE,

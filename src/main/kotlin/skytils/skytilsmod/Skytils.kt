@@ -18,13 +18,13 @@
 
 package skytils.skytilsmod
 
-import club.sk1er.vigilance.gui.SettingsGui
 import com.google.common.collect.Lists
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.gsquaredxc.hyskyAPI.StateRegister.StateRegisters
 import com.gsquaredxc.hyskyAPI.eventListeners.EventRegister
 import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
+import gg.essential.vigilance.gui.SettingsGui
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiIngameMenu
@@ -42,15 +42,10 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import skytils.skytilsmod.commands.ArmorColorCommand
-import skytils.skytilsmod.commands.GlintCustomizeCommand
-import skytils.skytilsmod.commands.RepartyCommand
-import skytils.skytilsmod.commands.SkytilsCommand
+import skytils.skytilsmod.commands.*
 import skytils.skytilsmod.commands.stats.impl.CataCommand
-import skytils.skytilsmod.core.Config
-import skytils.skytilsmod.core.GuiManager
-import skytils.skytilsmod.core.SoundQueue
-import skytils.skytilsmod.core.UpdateChecker
+import skytils.skytilsmod.core.*
+import skytils.skytilsmod.events.PacketEvent
 import skytils.skytilsmod.features.impl.dungeons.*
 import skytils.skytilsmod.features.impl.dungeons.solvers.*
 import skytils.skytilsmod.features.impl.dungeons.solvers.terminals.*
@@ -77,8 +72,8 @@ import skytils.skytilsmod.gui.commandaliases.CommandAliasesGui
 import skytils.skytilsmod.gui.keyshortcuts.KeyShortcutsGui
 import skytils.skytilsmod.listeners.ChatListener
 import skytils.skytilsmod.listeners.DungeonListener
-import skytils.skytilsmod.mixins.AccessorCommandHandler
-import skytils.skytilsmod.mixins.AccessorSettingsGui
+import skytils.skytilsmod.mixins.accessors.AccessorCommandHandler
+import skytils.skytilsmod.mixins.accessors.AccessorSettingsGui
 import skytils.skytilsmod.utils.ConfigUtil
 import skytils.skytilsmod.utils.SBInfo
 import skytils.skytilsmod.utils.Utils
@@ -102,7 +97,7 @@ class Skytils {
     companion object {
         const val MODID = "skytils"
         const val MOD_NAME = "Skytils"
-        const val VERSION = "1.0-pre9"
+        const val VERSION = "1.0-pre13.1"
 
         @JvmField
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -211,6 +206,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(ClickInOrderSolver())
         MinecraftForge.EVENT_BUS.register(CreeperSolver())
         MinecraftForge.EVENT_BUS.register(CommandAliases())
+        MinecraftForge.EVENT_BUS.register(CooldownTracker())
         MinecraftForge.EVENT_BUS.register(DamageSplash())
         MinecraftForge.EVENT_BUS.register(DarkModeMist())
         MinecraftForge.EVENT_BUS.register(dungeonFeatures)
@@ -236,7 +232,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(ProtectItems())
         MinecraftForge.EVENT_BUS.register(RainTimer())
         MinecraftForge.EVENT_BUS.register(RelicWaypoints())
-        MinecraftForge.EVENT_BUS.register(ScoreCalculation())
+        MinecraftForge.EVENT_BUS.register(ScoreCalculation)
         MinecraftForge.EVENT_BUS.register(selectAllColorSolver)
         MinecraftForge.EVENT_BUS.register(ShootTheTargetSolver())
         MinecraftForge.EVENT_BUS.register(SimonSaysSolver())
@@ -263,6 +259,14 @@ class Skytils {
         usingLabymod = Loader.isModLoaded("labymod")
         usingNEU = Loader.isModLoaded("notenoughupdates")
 
+        if (usingDungeonRooms && Loader.instance().indexedModList["dungeonrooms"]!!.version.startsWith("2")) {
+            try {
+                ScoreCalculation.drmRoomScanMethod =
+                    Class.forName("io.github.quantizr.utils.Utils").getDeclaredMethod("roomList")
+            } catch (_: Exception) {
+            }
+        }
+
         val cch = ClientCommandHandler.instance
 
         if (cch is AccessorCommandHandler) {
@@ -280,6 +284,10 @@ class Skytils {
 
             if (!cch.commands.containsKey("glintcustomize")) {
                 cch.registerCommand(GlintCustomizeCommand)
+            }
+
+            if (!cch.commands.containsKey("trackcooldown")) {
+                cch.registerCommand(TrackCooldownCommand)
             }
 
             if (config.overrideReparty || !cch.commands.containsKey("reparty")) {
@@ -360,8 +368,11 @@ class Skytils {
     fun onGuiChange(event: GuiOpenEvent) {
         val old = mc.currentScreen
         if (event.gui == null && config.reopenOptionsMenu) {
-            if (old is CommandAliasesGui || old is LocationEditGui || old is KeyShortcutsGui || (old is SettingsGui && (old as AccessorSettingsGui).config is Config)) event.gui =
-                OptionsGui()
+            if (old is CommandAliasesGui || old is LocationEditGui || old is KeyShortcutsGui || (old is SettingsGui && (old as AccessorSettingsGui).config is Config)) {
+                TickTask(1) {
+                    displayScreen = OptionsGui()
+                }
+            }
         }
     }
 }
