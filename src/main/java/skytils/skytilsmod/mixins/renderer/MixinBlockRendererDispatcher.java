@@ -18,6 +18,7 @@
 
 package skytils.skytilsmod.mixins.renderer;
 
+import com.gsquaredxc.hyskyAPI.eventListeners.EventListener;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -27,7 +28,6 @@ import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,10 +44,13 @@ public abstract class MixinBlockRendererDispatcher implements IResourceManagerRe
     @Inject(method = "getModelFromBlockState", at = @At("RETURN"), cancellable = true)
     private void modifyGetModelFromBlockState(IBlockState state, IBlockAccess worldIn, BlockPos pos, CallbackInfoReturnable<IBakedModel> cir) {
         try {
-            RenderBlockInWorldEvent event = new RenderBlockInWorldEvent(state, worldIn, pos);
-            HyskyAPIListeners.renderBlockInWorldListener.eventHappens(event);
-            if (event.state != state) {
-                cir.setReturnValue(this.blockModelShapes.getModelForState(event.state));
+            EventListener listener = HyskyAPIListeners.renderBlockInWorldListener;
+            if (listener.isActive()) {
+                RenderBlockInWorldEvent event = new RenderBlockInWorldEvent(state, worldIn, pos);
+                listener.eventHappens(event);
+                if (event.state != state) {
+                    cir.setReturnValue(this.blockModelShapes.getModelForState(event.state));
+                }
             }
         } catch (Throwable e) {
             Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(new ChatComponentText("§cSkytils caught and logged an exception at RenderBlockInWorldEvent. Please report this on the Discord server."));
