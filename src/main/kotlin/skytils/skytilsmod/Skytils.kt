@@ -149,14 +149,19 @@ class Skytils {
         @JvmField
         val startsWithSequenceSolver: StartsWithSequenceSolver = StartsWithSequenceSolver()
 
-        @JvmField
-        val griffinBurrows: GriffinBurrows = GriffinBurrows()
+        lateinit var griffinBurrows: GriffinBurrows
 
         @JvmField
         val mayorDiana: MayorDiana = MayorDiana()
 
         @JvmField
         val creeperSolver: CreeperSolver = CreeperSolver()
+
+        @JvmField
+        val darkModeMist: DarkModeMist = DarkModeMist()
+
+        @JvmField
+        val miningFeatures: MiningFeatures = MiningFeatures()
 
         @JvmField
         val threadPool: ExecutorService = Executors.newFixedThreadPool(10)
@@ -187,6 +192,7 @@ class Skytils {
     @Mod.EventHandler
     fun init(event: FMLInitializationEvent) {
         dungeonFeatures = DungeonFeatures()
+        griffinBurrows = GriffinBurrows()
         config = Config()
         config.preload()
 
@@ -217,7 +223,6 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(CommandAliases())
         MinecraftForge.EVENT_BUS.register(CooldownTracker())
         MinecraftForge.EVENT_BUS.register(DamageSplash())
-        MinecraftForge.EVENT_BUS.register(DarkModeMist())
         MinecraftForge.EVENT_BUS.register(dungeonFeatures)
         MinecraftForge.EVENT_BUS.register(DungeonMap())
         MinecraftForge.EVENT_BUS.register(DungeonTimer())
@@ -233,7 +238,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(mayorDiana)
         MinecraftForge.EVENT_BUS.register(MayorJerry())
         MinecraftForge.EVENT_BUS.register(MayorJerryTracker)
-        MinecraftForge.EVENT_BUS.register(MiningFeatures())
+        MinecraftForge.EVENT_BUS.register(miningFeatures)
         MinecraftForge.EVENT_BUS.register(MinionFeatures())
         MinecraftForge.EVENT_BUS.register(MiscFeatures())
         MinecraftForge.EVENT_BUS.register(MythologicalTracker())

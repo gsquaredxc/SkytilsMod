@@ -15,15 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package skytils.skytilsmod.events
 
-import net.minecraft.block.state.IBlockState
-import net.minecraft.util.BlockPos
-import net.minecraft.world.IBlockAccess
-import com.gsquaredxc.hyskyAPI.eventListeners.Event
+package skytils.skytilsmod.utils;
 
-/**
- * This event is posted when the chunk renderer tries to get the block model for a certain block.
- */
+import com.gsquaredxc.hyskyAPI.PublicListeners;
+import com.gsquaredxc.hyskyAPI.eventListeners.EventListener;
+import skytils.skytilsmod.events.RenderBlockInWorldEvent;
 
-class RenderBlockInWorldEvent(@JvmField var state: IBlockState?, var world: IBlockAccess, var pos: BlockPos?) : Event()
+object HyskyAPIListeners {
+    @JvmField
+    val renderBlockInWorldListener: EventListener
+
+    init {
+        PublicListeners.registerEvent(RenderBlockInWorldEvent::class.java)
+        renderBlockInWorldListener = PublicListeners.listenerHashMap[RenderBlockInWorldEvent::class.java]!!
+    }
+}

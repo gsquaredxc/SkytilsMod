@@ -18,6 +18,7 @@
 package skytils.skytilsmod.features.impl.dungeons.solvers
 
 import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -54,8 +55,7 @@ class CreeperSolver {
      * @author bowser0000
      */
     @EventListener(id = "STOnTickCreeperSolver")
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START) return
+    fun onTick(event: TickStartEvent) {
         val mc = Minecraft.getMinecraft()
         val world: World? = mc.theWorld
         val player = mc.thePlayer

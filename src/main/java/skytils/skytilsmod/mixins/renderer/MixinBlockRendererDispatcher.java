@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import skytils.skytilsmod.events.RenderBlockInWorldEvent;
+import skytils.skytilsmod.utils.HyskyAPIListeners;
 
 @Mixin(BlockRendererDispatcher.class)
 public abstract class MixinBlockRendererDispatcher implements IResourceManagerReloadListener {
@@ -44,7 +45,7 @@ public abstract class MixinBlockRendererDispatcher implements IResourceManagerRe
     private void modifyGetModelFromBlockState(IBlockState state, IBlockAccess worldIn, BlockPos pos, CallbackInfoReturnable<IBakedModel> cir) {
         try {
             RenderBlockInWorldEvent event = new RenderBlockInWorldEvent(state, worldIn, pos);
-            MinecraftForge.EVENT_BUS.post(event);
+            HyskyAPIListeners.renderBlockInWorldListener.eventHappens(event);
             if (event.state != state) {
                 cir.setReturnValue(this.blockModelShapes.getModelForState(event.state));
             }

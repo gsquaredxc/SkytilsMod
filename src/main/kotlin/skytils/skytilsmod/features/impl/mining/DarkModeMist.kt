@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.features.impl.mining
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.block.BlockCarpet
@@ -33,7 +34,7 @@ import skytils.skytilsmod.utils.SBInfo
 import skytils.skytilsmod.utils.Utils
 
 class DarkModeMist {
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @EventListener(id="STRENDERDarkMode")
     fun onGetBlockModel(event: RenderBlockInWorldEvent) {
         if (!Utils.inSkyblock || !Skytils.config.darkModeMist) return
         if (LocationState.serverType == ServerTypes.DwarvenMines && event.state != null && event.pos != null) {

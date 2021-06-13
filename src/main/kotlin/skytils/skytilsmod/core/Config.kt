@@ -29,6 +29,7 @@ import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.dungeonFeatures
 import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
+import skytils.skytilsmod.events.RenderBlockInWorldEvent
 import skytils.skytilsmod.utils.ConfigUtil
 import java.awt.Color
 import java.io.File
@@ -2522,6 +2523,13 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         ConfigUtil.connectConfigToState(this,"onTick",
             Skytils.mayorDiana, TickStartEvent::class.java, StateRegisters.inSkyblock,
             ::trackGaiaHits, trackGaiaHits, "STOnTickDiana")
+        //SPECIAL:
+        ConfigUtil.connectConfigToState(this,"onGetBlockModel",
+            Skytils.darkModeMist, RenderBlockInWorldEvent::class.java, StateRegisters.inSkyblock,
+            ::darkModeMist, darkModeMist, "STRENDERDarkMode")
+        ConfigUtil.connectConfigToState(this,"onGetBlockModel",
+            Skytils.miningFeatures, RenderBlockInWorldEvent::class.java, StateRegisters.inSkyblock,
+            ::recolorCarpets, recolorCarpets, "STRENDERCarpetColor")
     }
 
     private object ConfigSorting : SortingBehavior() {

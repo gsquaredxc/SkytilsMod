@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.features.impl.mining
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.block.BlockCarpet
@@ -267,11 +268,11 @@ class MiningFeatures {
         inRaffle = false
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
+    @EventListener(id="STRENDERCarpetColor")
     fun onGetBlockModel(event: RenderBlockInWorldEvent) {
-        if (!LocationState.isOnSkyblock || LocationState.serverType != ServerTypes.DwarvenMines || event.state == null) return
+        if (LocationState.serverType != ServerTypes.DwarvenMines || event.state == null) return
         val state = event.state!!
-        if (Skytils.config.recolorCarpets && state.block === Blocks.carpet && Utils.equalsOneOf(
+        if (state.block === Blocks.carpet && Utils.equalsOneOf(
                 state.getValue(
                     BlockCarpet.COLOR
                 ), EnumDyeColor.GRAY, EnumDyeColor.LIGHT_BLUE, EnumDyeColor.YELLOW

@@ -19,6 +19,7 @@
 package skytils.skytilsmod.features.impl.events
 
 import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityIronGolem
@@ -105,7 +106,7 @@ class MayorDiana {
         }
 
     @EventListener(id="STOnTickDiana")
-    fun onTick(event: TickEvent.ClientTickEvent) {
+    fun onTick(event: TickStartEvent) {
         for (golem in gaiaConstructHits.keys) {
             if (golem.hurtTime == 10) {
                 gaiaConstructHits[golem] = 0
