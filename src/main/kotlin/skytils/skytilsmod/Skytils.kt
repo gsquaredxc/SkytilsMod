@@ -171,12 +171,9 @@ class Skytils {
     @Mod.EventHandler
     fun preInit(event: FMLPreInitializationEvent) {
         // Must use reflection otherwise the "constant" value will be inlined by compiler
-        val forgeVersion = try {
+        val forgeVersion = runCatching {
             ForgeVersion::class.java.getDeclaredField("buildVersion").get(null) as Int
-        } catch (e: Exception) {
-            e.printStackTrace()
-            2318
-        }
+        }.onFailure { it.printStackTrace() }.getOrDefault(2318)
         // Asbyth's forge fork uses version 0
         if (!(forgeVersion >= 2318 || forgeVersion == 0)) {
             Desktop.getDesktop()
@@ -274,10 +271,9 @@ class Skytils {
         usingNEU = Loader.isModLoaded("notenoughupdates")
 
         if (usingDungeonRooms && Loader.instance().indexedModList["dungeonrooms"]!!.version.startsWith("2")) {
-            try {
+            runCatching {
                 ScoreCalculation.drmRoomScanMethod =
                     Class.forName("io.github.quantizr.utils.Utils").getDeclaredMethod("roomList")
-            } catch (_: Exception) {
             }
         }
 
