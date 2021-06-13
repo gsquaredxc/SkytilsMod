@@ -31,6 +31,7 @@ import skytils.skytilsmod.Skytils.Companion.farmingFeatures
 import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.events.RenderBlockInWorldEvent
 import skytils.skytilsmod.utils.ConfigUtil
+import skytils.skytilsmod.utils.HyskyAPIListeners
 import java.awt.Color
 import java.io.File
 
@@ -2487,6 +2488,7 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
             this.transparentHeadLayer /= 100f
             markDirty()
         }
+        HyskyAPIListeners.initialize()
 
         /*Start listener registration via sk1er shit*/
         //farming

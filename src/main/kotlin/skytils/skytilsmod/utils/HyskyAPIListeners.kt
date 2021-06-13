@@ -23,10 +23,9 @@ import com.gsquaredxc.hyskyAPI.eventListeners.EventListener;
 import skytils.skytilsmod.events.RenderBlockInWorldEvent;
 
 object HyskyAPIListeners {
-    @JvmField
-    val renderBlockInWorldListener: EventListener
+    lateinit var renderBlockInWorldListener: EventListener
 
-    init {
+    fun initialize() {
         PublicListeners.registerEvent(RenderBlockInWorldEvent::class.java)
         renderBlockInWorldListener = PublicListeners.listenerHashMap[RenderBlockInWorldEvent::class.java]!!
     }
