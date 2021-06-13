@@ -55,9 +55,10 @@ import java.util.regex.Pattern
 
 class PetFeatures {
     @SubscribeEvent
-    fun onCheckRender(event: CheckRenderEntityEvent<*>) {
-        if (!Utils.inSkyblock) return
+    fun onCheckRender(event: CheckRenderEntityEvent<EntityArmorStand>) {
+        @Suppress("USELESS_IS_CHECK")
         if (event.entity is EntityArmorStand) {
+            if (!Utils.inSkyblock) return
             val entity = event.entity
             val name = entity.customNameTag
             if (Skytils.config.hidePetNametags && name.startsWith("§8[§7Lv") && name.contains(

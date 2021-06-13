@@ -166,10 +166,10 @@ class SlayerFeatures {
     }
 
     @SubscribeEvent
-    fun onRenderLivingPre(event: RenderLivingEvent.Pre<EntityLivingBase>) {
+    fun onRenderLivingPre(event: RenderLivingEvent.Pre<EntityArmorStand>) {
         if (!Utils.inSkyblock) return
         if (event.entity is EntityArmorStand) {
-            val entity = event.entity as EntityArmorStand
+            val entity = event.entity
             if (!entity.hasCustomName()) return
             val name = entity.displayName.unformattedText
             if (Skytils.config.slayerBossHitbox && name.endsWith("§c❤") && !name.endsWith("§e0§c❤") && !mc.renderManager.isDebugBoundingBox) {

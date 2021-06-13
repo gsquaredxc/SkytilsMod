@@ -96,7 +96,7 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
                 GlStateManager.disableCull()
                 RenderUtil.drawFilledBoundingBox(AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1), Color(114, 245, 82), 1f)
                 GlStateManager.disableTexture2D()
-                if (distSq > 5 * 5) RenderUtil.renderBeaconBeam(
+                if (distSq > 25 /*5^2*/) RenderUtil.renderBeaconBeam(
                     x,
                     y + 1,
                     z,
@@ -121,7 +121,7 @@ class RelicWaypoints : PersistentSave(File(Skytils.modDir, "found_spiders_den_re
                 GlStateManager.disableCull()
                 RenderUtil.drawFilledBoundingBox(AxisAlignedBB(x, y, z, x + 1, y + 1, z + 1), Color(152, 41, 222), 1f)
                 GlStateManager.disableTexture2D()
-                if (distSq > 5 * 5) RenderUtil.renderBeaconBeam(
+                if (distSq > 25 /*5^2*/) RenderUtil.renderBeaconBeam(
                     x,
                     y + 1,
                     z,

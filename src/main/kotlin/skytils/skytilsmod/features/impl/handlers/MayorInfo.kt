@@ -59,7 +59,7 @@ object MayorInfo {
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (!Utils.inSkyblock || event.phase != TickEvent.Phase.START) return
-        if (ticks % (60 * 20) == 0) {
+        if (ticks % 1200 /*(60 * 20)*/ == 0) {
             if (currentMayor == "Jerry" && System.currentTimeMillis() > newJerryPerks) {
                 if (jerryMayor != null && Skytils.config.displayJerryPerks) {
                     SoundQueue.addToQueue("random.orb", 0.8f, 1f, 1, true)
@@ -69,10 +69,10 @@ object MayorInfo {
                 jerryMayor = null
                 fetchJerryData()
             }
-            if (System.currentTimeMillis() - lastFetchedMayorData > 24 * 60 * 60 * 1000 || isLocal) {
+            if (System.currentTimeMillis() - lastFetchedMayorData > 86400000 /*24 * 60 * 60 * 1000*/ || isLocal) {
                 fetchMayorData()
             }
-            if (System.currentTimeMillis() - lastCheckedElectionOver > 60 * 60 * 1000) {
+            if (System.currentTimeMillis() - lastCheckedElectionOver > 3600000 /*60 * 60 * 1000*/) {
                 var elected = currentMayor
                 for (pi in TabListUtils.tabEntries) {
                     val name = pi.getText()

@@ -76,16 +76,18 @@ class TechnoMayor {
             val y = orb.yCoord - viewerY
             val z = orb.zCoord - viewerZ
             val distSq = x * x + y * y + z * z
-            GlStateManager.disableCull()
-            GlStateManager.disableTexture2D()
-            if (distSq > 5 * 5) RenderUtil.renderBeaconBeam(x, y, z, Color(114, 245, 82).rgb, 0.75f, event.partialTicks)
+            if (distSq > 25/*5^2*/){
+                RenderUtil.renderBeaconBeam(x, y, z, Color(114, 245, 82).rgb, 0.75f, event.partialTicks)
+            } else {
+                GlStateManager.disableCull()
+                GlStateManager.disableTexture2D()
+            }
             GlStateManager.disableDepth()
             RenderUtil.renderWaypointText("Orb", orb.xCoord, orb.yCoord + 1.5f, orb.zCoord, event.partialTicks)
-            GlStateManager.disableLighting()
-            GlStateManager.enableTexture2D()
             GlStateManager.enableDepth()
-            GlStateManager.enableCull()
         }
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableCull()
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)

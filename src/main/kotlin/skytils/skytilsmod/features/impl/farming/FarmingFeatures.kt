@@ -47,8 +47,8 @@ class FarmingFeatures {
 
     @SubscribeEvent
     fun onAttemptBreak(event: DamageBlockEvent) {
-        if (!Utils.inSkyblock || mc.thePlayer == null || mc.theWorld == null) return
         val p = mc.thePlayer
+        if (!Utils.inSkyblock || p == null || mc.theWorld == null) return
         val heldItem = p.heldItem
         val block = mc.theWorld.getBlockState(event.pos).block
         if (Skytils.config.preventBreakingFarms && heldItem != null) {
