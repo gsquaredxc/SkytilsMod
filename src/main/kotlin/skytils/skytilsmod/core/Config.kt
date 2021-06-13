@@ -2497,16 +2497,31 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
         ConfigUtil.connectConfigToState(this,"onTickLivid",dungeonFeatures, TickStartEvent::class.java,StateRegisters.inDungeons,::findCorrectLivid ,findCorrectLivid,"STDungeonOnTickLivid")
         //solvers
         ConfigUtil.connectConfigToState(this,"onTick",
-            Skytils.iceFillSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::iceFillSolver ,iceFillSolver,"STOnTickIceFillSolver")
+            Skytils.iceFillSolver, TickStartEvent::class.java,StateRegisters.inDungeons,
+            ::iceFillSolver ,iceFillSolver,"STOnTickIceFillSolver")
         ConfigUtil.connectConfigToState(this,"onTick",
-            Skytils.icePathSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::icePathSolver ,icePathSolver,"STOnTickIcePathSolver")
+            Skytils.icePathSolver, TickStartEvent::class.java,StateRegisters.inDungeons,
+            ::icePathSolver ,icePathSolver,"STOnTickIcePathSolver")
         ConfigUtil.connectConfigToState(this,"onTick",
-            Skytils.boulderSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::boulderSolver ,boulderSolver,"STOnTickBoulderSolver")
+            Skytils.boulderSolver, TickStartEvent::class.java,StateRegisters.inDungeons,
+            ::boulderSolver ,boulderSolver,"STOnTickBoulderSolver")
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.creeperSolver, TickStartEvent::class.java,StateRegisters.inDungeons,
+            ::creeperBeamsSolver ,creeperBeamsSolver,"STOnTickCreeperSolver")
         //f7 solvers
         ConfigUtil.connectConfigToState(this,"onTick",
-            Skytils.selectAllColorSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::selectAllColorTerminalSolver ,selectAllColorTerminalSolver,"STOnTickColorSolver")
+            Skytils.selectAllColorSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::selectAllColorTerminalSolver,
+            selectAllColorTerminalSolver,"STOnTickColorSolver")
         ConfigUtil.connectConfigToState(this,"onTick",
-            Skytils.startsWithSequenceSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::startsWithSequenceTerminalSolver ,startsWithSequenceTerminalSolver,"STOnTickSeqSolver")
+            Skytils.startsWithSequenceSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::startsWithSequenceTerminalSolver,
+            startsWithSequenceTerminalSolver,"STOnTickSeqSolver")
+        //events
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.griffinBurrows, TickStartEvent::class.java, StateRegisters.inSkyblock,
+            ::showGriffinBurrows, showGriffinBurrows, "STOnTickGriffinBurrow")
+        ConfigUtil.connectConfigToState(this,"onTick",
+            Skytils.mayorDiana, TickStartEvent::class.java, StateRegisters.inSkyblock,
+            ::trackGaiaHits, trackGaiaHits, "STOnTickDiana")
     }
 
     private object ConfigSorting : SortingBehavior() {

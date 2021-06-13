@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.events
 
 import com.google.gson.JsonElement
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
+import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.client.Minecraft
@@ -119,10 +121,10 @@ class GriffinBurrows {
         }
     }
 
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
+    @EventListener(id = "STOnTickGriffinBurrow")
+    fun onTick(event: TickStartEvent) {
         val player = mc.thePlayer
-        if (!Skytils.config.showGriffinBurrows || event.phase != TickEvent.Phase.START || !Utils.inSkyblock || player == null || LocationState.serverType != ServerTypes.Hub) return
+        if (player == null || LocationState.serverType != ServerTypes.Hub) return
         if (!burrowRefreshTimer.isStarted) burrowRefreshTimer.start()
         if ((burrowRefreshTimer.time >= 60_000L || shouldRefreshBurrows)) {
             burrowRefreshTimer.reset()

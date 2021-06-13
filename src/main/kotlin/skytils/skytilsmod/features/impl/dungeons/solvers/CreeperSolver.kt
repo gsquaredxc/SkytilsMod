@@ -17,6 +17,7 @@
  */
 package skytils.skytilsmod.features.impl.dungeons.solvers
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
 import net.minecraft.block.Block
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.GlStateManager
@@ -34,7 +35,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.opengl.GL11
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
-import skytils.skytilsmod.features.impl.dungeons.DungeonFeatures
 import skytils.skytilsmod.listeners.DungeonListener
 import skytils.skytilsmod.utils.RenderUtil
 import skytils.skytilsmod.utils.Utils
@@ -53,14 +53,15 @@ class CreeperSolver {
      * https://github.com/bowser0000/SkyblockMod/blob/master/LICENSE
      * @author bowser0000
      */
-    @SubscribeEvent
+    @EventListener(id = "STOnTickCreeperSolver")
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         val mc = Minecraft.getMinecraft()
         val world: World? = mc.theWorld
         val player = mc.thePlayer
+        if (world != null && player != null) return
         if (ticks % 20 == 0) {
-            if (Skytils.config.creeperBeamsSolver && Utils.inDungeons && world != null && player != null && DungeonListener.missingPuzzles.contains(
+            if (DungeonListener.missingPuzzles.contains(
                     "Creeper Beams"
                 )
             ) {
@@ -70,7 +71,7 @@ class CreeperSolver {
                 if (this.creeper == null) {
                     // Find creepers nearby
                     val creeperScan = AxisAlignedBB(x - 14, y - 8, z - 13, x + 14, y + 8, z + 13) // 28x16x26 cube
-                    this.creeper = world.getEntitiesWithinAABB(EntityCreeper::class.java, creeperScan).find {
+                    this.creeper = world!!.getEntitiesWithinAABB(EntityCreeper::class.java, creeperScan).find {
                         !it.isInvisible && it.maxHealth == 20f && it.health == 20f && it.name == "Creeper"
                     }
                 } else {
@@ -81,7 +82,7 @@ class CreeperSolver {
                         val point1 = BlockPos(creeper.posX - 14, creeper.posY - 7, creeper.posZ - 13)
                         val point2 = BlockPos(creeper.posX + 14, creeper.posY + 10, creeper.posZ + 13)
                         for (blockPos in BlockPos.getAllInBox(point1, point2)) {
-                            val block: Block = world.getBlockState(blockPos).block
+                            val block: Block = world!!.getBlockState(blockPos).block
                             if (block === Blocks.sea_lantern || block === Blocks.prismarine) {
                                 // Connect block to nearest block on opposite side
                                 val startBlock = Vec3(blockPos.x + 0.5, blockPos.y + 0.5, blockPos.z + 0.5)

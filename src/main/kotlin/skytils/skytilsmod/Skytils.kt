@@ -150,6 +150,15 @@ class Skytils {
         val startsWithSequenceSolver: StartsWithSequenceSolver = StartsWithSequenceSolver()
 
         @JvmField
+        val griffinBurrows: GriffinBurrows = GriffinBurrows()
+
+        @JvmField
+        val mayorDiana: MayorDiana = MayorDiana()
+
+        @JvmField
+        val creeperSolver: CreeperSolver = CreeperSolver()
+
+        @JvmField
         val threadPool: ExecutorService = Executors.newFixedThreadPool(10)
     }
 
@@ -204,7 +213,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(boulderSolver)
         MinecraftForge.EVENT_BUS.register(ChestProfit())
         MinecraftForge.EVENT_BUS.register(ClickInOrderSolver())
-        MinecraftForge.EVENT_BUS.register(CreeperSolver())
+        MinecraftForge.EVENT_BUS.register(creeperSolver)
         MinecraftForge.EVENT_BUS.register(CommandAliases())
         MinecraftForge.EVENT_BUS.register(CooldownTracker())
         MinecraftForge.EVENT_BUS.register(DamageSplash())
@@ -215,13 +224,13 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(farmingFeatures)
         MinecraftForge.EVENT_BUS.register(FavoritePets())
         MinecraftForge.EVENT_BUS.register(GlintCustomizer())
-        MinecraftForge.EVENT_BUS.register(GriffinBurrows())
+        MinecraftForge.EVENT_BUS.register(griffinBurrows)
         MinecraftForge.EVENT_BUS.register(iceFillSolver)
         MinecraftForge.EVENT_BUS.register(icePathSolver)
         MinecraftForge.EVENT_BUS.register(ItemFeatures())
         MinecraftForge.EVENT_BUS.register(KeyShortcuts())
         MinecraftForge.EVENT_BUS.register(LockOrb())
-        MinecraftForge.EVENT_BUS.register(MayorDiana())
+        MinecraftForge.EVENT_BUS.register(mayorDiana)
         MinecraftForge.EVENT_BUS.register(MayorJerry())
         MinecraftForge.EVENT_BUS.register(MayorJerryTracker)
         MinecraftForge.EVENT_BUS.register(MiningFeatures())

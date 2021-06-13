@@ -18,6 +18,7 @@
 
 package skytils.skytilsmod.features.impl.events
 
+import com.gsquaredxc.hyskyAPI.annotations.EventListener
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityIronGolem
@@ -103,10 +104,9 @@ class MayorDiana {
             }
         }
 
-    @SubscribeEvent
+    @EventListener(id="STOnTickDiana")
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!Utils.inSkyblock || !Skytils.config.trackGaiaHits) return
-        if (event.phase == TickEvent.Phase.START) for (golem in gaiaConstructHits.keys) {
+        for (golem in gaiaConstructHits.keys) {
             if (golem.hurtTime == 10) {
                 gaiaConstructHits[golem] = 0
             }
