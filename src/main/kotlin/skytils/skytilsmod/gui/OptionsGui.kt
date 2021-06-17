@@ -27,6 +27,7 @@ import gg.essential.elementa.constraints.animation.Animations
 import gg.essential.elementa.dsl.*
 import gg.essential.elementa.font.DefaultFonts
 import gg.essential.vigilance.VigilanceConfig
+import net.minecraft.client.Minecraft
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.gui.commandaliases.CommandAliasesGui
 import skytils.skytilsmod.gui.components.SimpleButton
@@ -39,16 +40,14 @@ class OptionsGui : WindowScreen(newGuiScale = 2) {
 
     private val skytilsText: UIText = UIText("Skytils", shadow = false).childOf(window).constrain {
         x = CenterConstraint()
-        y = RelativeConstraint(0.25f) - 75.pixels()
-        textScale = 12.5.pixels()
-        fontProvider = DefaultFonts.ELEMENTA_MINECRAFT_FONT_RENDERER
+        y = RelativeConstraint(0.1f)
+        textScale = basicTextScaleConstraint { window.getHeight() / 40 }
     }
 
     init {
-        // TODO figure out the math to make everything fit on screen even when it's small
         SimpleButton("Config").childOf(window).constrain {
             x = CenterConstraint()
-            y = RelativeConstraint(0.25f) + 100.pixels()
+            y = SiblingConstraint() + RelativeConstraint(0.15f)
             width = 200.pixels()
             height = 20.pixels()
         }.onMouseClick {
@@ -116,5 +115,13 @@ class OptionsGui : WindowScreen(newGuiScale = 2) {
                     animate()
                 }
         }
+    }
+
+    override fun setWorldAndResolution(mc: Minecraft, width: Int, height: Int) {
+        window.onWindowResize()
+        skytilsText.constrain {
+            textScale = basicTextScaleConstraint { window.getHeight() / 40 }
+        }
+        super.setWorldAndResolution(mc, width, height)
     }
 }

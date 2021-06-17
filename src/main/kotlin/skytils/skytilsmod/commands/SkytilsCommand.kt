@@ -186,7 +186,7 @@ object SkytilsCommand : CommandBase() {
                     SafeMessageSender.SAFE_MESSAGE_SENDER.queueMessage("/warpforge")
                     CoroutineScope(Dispatchers.Default).launch {
                         delay(500)
-                        SafeMessageSender.SAFE_MESSAGE_SENDER.queueMessage("/warp hub")
+                        SafeMessageSender.SAFE_MESSAGE_SENDER.queueMessage("/warp ${args.getOrNull(1) ?: "hub"}")
                     }
                 }
             }
