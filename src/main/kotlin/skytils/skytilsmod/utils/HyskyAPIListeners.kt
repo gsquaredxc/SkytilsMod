@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package skytils.skytilsmod.utils;
+package skytils.skytilsmod.utils
 
-import com.gsquaredxc.hyskyAPI.PublicListeners;
-import com.gsquaredxc.hyskyAPI.eventListeners.EventListener;
-import skytils.skytilsmod.events.RenderBlockInWorldEvent;
+import com.gsquaredxc.hyskyAPI.PublicListeners
+import com.gsquaredxc.hyskyAPI.eventListeners.EventListener
+import skytils.skytilsmod.events.RenderBlockInWorldEvent
 
 object HyskyAPIListeners {
     lateinit var renderBlockInWorldListener: EventListener
