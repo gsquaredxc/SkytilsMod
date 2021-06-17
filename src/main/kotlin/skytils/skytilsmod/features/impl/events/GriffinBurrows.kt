@@ -284,8 +284,8 @@ class GriffinBurrows {
     @SubscribeEvent
     fun onReceivePacket(event: ReceiveEvent) {
         if (!Utils.inSkyblock) return
-        Utils.checkThreadAndQueue {
-            if (Skytils.config.showGriffinBurrows && Skytils.config.particleBurrows && event.packet is S2APacketParticles) {
+        if (Skytils.config.showGriffinBurrows && Skytils.config.particleBurrows && event.packet is S2APacketParticles) {
+            Utils.checkThreadAndQueue {
                 if (LocationState.serverType != ServerTypes.Hub) return@checkThreadAndQueue
                 val packet = event.packet
                 val type = packet.particleType
@@ -315,7 +315,8 @@ class GriffinBurrows {
                             if (existingBurrow.blockPos.distanceSq(x, y, z) < 4) return@checkThreadAndQueue
                         }
                         var burrow = particleBurrows.find { b: ParticleBurrow -> b.blockPos == pos }
-                        if (burrow == null) burrow = ParticleBurrow(pos, hasFootstep = false, hasEnchant = false, type = -1)
+                        if (burrow == null) burrow =
+                            ParticleBurrow(pos, hasFootstep = false, hasEnchant = false, type = -1)
                         if (!particleBurrows.contains(burrow)) particleBurrows.add(burrow)
                         if (!burrow.hasFootstep && footstepFilter) {
                             burrow.hasFootstep = true

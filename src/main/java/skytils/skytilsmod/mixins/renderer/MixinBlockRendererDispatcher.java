@@ -46,7 +46,7 @@ public abstract class MixinBlockRendererDispatcher implements IResourceManagerRe
         try {
             EventListener listener = HyskyAPIListeners.renderBlockInWorldListener;
             if (listener.isActive()) {
-                RenderBlockInWorldEvent event = new RenderBlockInWorldEvent(state, worldIn, pos);
+                RenderBlockInWorldEvent event = new RenderBlockInWorldEvent(state, pos);
                 listener.eventHappens(event);
                 if (event.state != state) {
                     cir.setReturnValue(this.blockModelShapes.getModelForState(event.state));

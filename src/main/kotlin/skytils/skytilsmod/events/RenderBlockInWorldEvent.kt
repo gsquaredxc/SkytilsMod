@@ -26,4 +26,4 @@ import com.gsquaredxc.hyskyAPI.eventListeners.Event
  * This event is posted when the chunk renderer tries to get the block model for a certain block.
  */
 
-class RenderBlockInWorldEvent(@JvmField var state: IBlockState?, var world: IBlockAccess, var pos: BlockPos?) : Event()
+class RenderBlockInWorldEvent(@JvmField var state: IBlockState?, var pos: BlockPos?) : Event()
