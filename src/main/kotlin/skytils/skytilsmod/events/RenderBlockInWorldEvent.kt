@@ -17,10 +17,9 @@
  */
 package skytils.skytilsmod.events
 
+import com.gsquaredxc.hyskyAPI.eventListeners.Event
 import net.minecraft.block.state.IBlockState
 import net.minecraft.util.BlockPos
-import net.minecraft.world.IBlockAccess
-import com.gsquaredxc.hyskyAPI.eventListeners.Event
 
 /**
  * This event is posted when the chunk renderer tries to get the block model for a certain block.

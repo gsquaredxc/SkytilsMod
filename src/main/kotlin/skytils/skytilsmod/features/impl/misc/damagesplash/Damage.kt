@@ -18,7 +18,6 @@
 package skytils.skytilsmod.features.impl.misc.damagesplash
 
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
-import java.util.regex.Pattern
 
 /**
  * Taken from Wynntils under GNU Affero General Public License v3.0

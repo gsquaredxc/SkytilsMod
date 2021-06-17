@@ -25,7 +25,6 @@ import net.minecraft.nbt.NBTTagCompound
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.features.impl.handlers.AuctionData
 import skytils.skytilsmod.features.impl.protectitems.strategy.ItemProtectStrategy
-import skytils.skytilsmod.utils.SBInfo
 
 class ItemWorthStrategy : ItemProtectStrategy() {
     override fun worthProtecting(item: ItemStack, extraAttr: NBTTagCompound?, type: ProtectType): Boolean {

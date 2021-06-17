@@ -29,7 +29,6 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderLivingEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.Skytils.Companion.mc
 import skytils.skytilsmod.events.CheckRenderEntityEvent

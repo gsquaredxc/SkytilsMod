@@ -26,11 +26,8 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.item.EnumDyeColor
 import net.minecraft.util.BlockPos
-import net.minecraftforge.fml.common.eventhandler.EventPriority
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.events.RenderBlockInWorldEvent
-import skytils.skytilsmod.utils.SBInfo
 import skytils.skytilsmod.utils.Utils
 
 class DarkModeMist {

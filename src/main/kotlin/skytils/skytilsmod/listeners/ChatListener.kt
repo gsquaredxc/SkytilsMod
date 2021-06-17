@@ -207,7 +207,7 @@ class ChatListener {
         var mc: Minecraft = Minecraft.getMinecraft()!!
         private var rejoinThread: Thread? = null
         private var lastPartyDisbander = ""
-        private val invitePattern = Pattern.compile("(?:(?:\\[.+?] )?(?:\\w+) invited )(?:\\[.+?] )?(\\w+)")
+        private val invitePattern = Pattern.compile("(?:\\[.+?] )?\\w+ invited (?:\\[.+?] )?(\\w+)")
         private val playerPattern = Pattern.compile("(?:\\[.+?] )?(\\w+)")
         private val party_start_pattern = Pattern.compile("^Party Members \\((\\d+)\\)$")
         private val leader_pattern = Pattern.compile("^Party Leader: (?:\\[.+?] )?(\\w+) ●$")

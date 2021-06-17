@@ -22,7 +22,6 @@ import com.google.common.collect.Lists
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.gsquaredxc.hyskyAPI.StateRegister.StateRegisters
-import com.gsquaredxc.hyskyAPI.eventListeners.EventRegister
 import com.gsquaredxc.hyskyAPI.events.misc.TickStartEvent
 import gg.essential.vigilance.gui.SettingsGui
 import net.minecraft.client.Minecraft
@@ -45,7 +44,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import skytils.skytilsmod.commands.*
 import skytils.skytilsmod.commands.stats.impl.CataCommand
 import skytils.skytilsmod.core.*
-import skytils.skytilsmod.events.PacketEvent
 import skytils.skytilsmod.features.impl.dungeons.*
 import skytils.skytilsmod.features.impl.dungeons.solvers.*
 import skytils.skytilsmod.features.impl.dungeons.solvers.terminals.*
