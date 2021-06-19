@@ -55,19 +55,18 @@ object DungeonListener {
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         if (ticks % 4 == 0) {
-            val localMissingPuzzles = HashSet<String>()
-            for (pi in TabListUtils.tabEntries) {
-                val name = pi.getText()
+            val localMissingPuzzles = TabListUtils.tabEntries.mapNotNull {
+                val name = it.text
                 if (name.contains("✦")) {
                     val matcher = missingPuzzlePattern.find(name)
                     if (matcher != null) {
                         val puzzleName = matcher.groups["puzzle"]!!.value
                         if (puzzleName != "???") {
-                            localMissingPuzzles.add(puzzleName)
+                            return@mapNotNull puzzleName
                         }
-                        continue
                     }
                 }
+                return@mapNotNull null
             }
             missingPuzzles.clear()
             missingPuzzles.addAll(localMissingPuzzles)
@@ -78,7 +77,7 @@ object DungeonListener {
                 val tabEntries = TabListUtils.tabEntries
                 for (teammate in team) {
                     if (tabEntries.size <= teammate.tabEntryIndex) continue
-                    val entry = tabEntries[teammate.tabEntryIndex].getText()
+                    val entry = tabEntries[teammate.tabEntryIndex].text
                     if (!entry.contains(teammate.playerName)) continue
                     teammate.player = mc.theWorld.playerEntities.find {
                         it.name == teammate.playerName && it.uniqueID.version() == 4
@@ -142,18 +141,18 @@ object DungeonListener {
         if (team.isNotEmpty() || !Utils.inDungeons) return
         val tabEntries = TabListUtils.tabEntries
 
-        if (tabEntries.isEmpty() || !tabEntries[0].getText().contains("§r§b§lParty §r§f(")) {
+        if (tabEntries.isEmpty() || !tabEntries[0].text.contains("§r§b§lParty §r§f(")) {
             TickTask(5) {
                 getMembers()
             }
             return
         }
 
-        val partyCount = partyCountPattern.find(tabEntries[0].getText())?.groupValues?.get(1)?.toInt()
+        val partyCount = partyCountPattern.find(tabEntries[0].text)?.groupValues?.get(1)?.toInt()
         println("There are $partyCount members in this party")
         for (i in 0 until partyCount!!) {
             val pos = 1 + i * 4
-            val text = tabEntries[pos].getText()
+            val text = tabEntries[pos].text
             val matcher = classPattern.find(text)
             if (matcher == null) {
                 println("Skipping over entry $text due to it not matching")
@@ -190,6 +189,7 @@ object DungeonListener {
         fun canRender() = player != null && player!!.health > 0 && !dead
     }
 
+    @Suppress("unused")
     enum class DungeonClass(val className: String) {
         ARCHER("Archer"),
         BERSERK("Berserk"),
@@ -199,7 +199,8 @@ object DungeonListener {
 
         companion object {
             fun getClassFromName(name: String): DungeonClass {
-                return values().find { it.className.lowercase() == name.lowercase() } ?: MAGE
+                return values().find { it.className.lowercase() == name.lowercase() }
+                    ?: throw IllegalArgumentException("No class could be found for the name $name")
             }
         }
     }

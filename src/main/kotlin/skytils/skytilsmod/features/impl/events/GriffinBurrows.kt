@@ -40,15 +40,14 @@ import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.DamageBlockEvent
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
-import skytils.skytilsmod.utils.APIUtil
-import skytils.skytilsmod.utils.RenderUtil
-import skytils.skytilsmod.utils.Utils
+import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer.TextAlignment
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import skytils.skytilsmod.utils.stripControlCodes
 import java.awt.Color
+import java.util.concurrent.Future
 import kotlin.math.roundToInt
 
 class GriffinBurrows {
@@ -60,9 +59,12 @@ class GriffinBurrows {
         var lastDugParticleBurrow: BlockPos? = null
         var burrowRefreshTimer = StopWatch()
         var shouldRefreshBurrows = false
+
+        var hasSpadeInHotbar = false
+
         private val mc = Minecraft.getMinecraft()
-        fun refreshBurrows() {
-            Skytils.threadPool.submit {
+        fun refreshBurrows(): Future<*> {
+            return Skytils.threadPool.submit {
                 println("Finding burrows")
                 val uuid = mc.thePlayer.gameProfile.id.toString().replace("[\\-]".toRegex(), "")
                 val apiKey = Skytils.config.apiKey
@@ -125,18 +127,18 @@ class GriffinBurrows {
     @EventListener(id = "STOnTickGriffinBurrow")
     fun onTick(event: TickStartEvent) {
         val player = mc.thePlayer
-        if (player == null || LocationState.serverType != ServerTypes.Hub) return
+        hasSpadeInHotbar = player != null && (0..7).any {
+            val hotbarItem = player.inventory.getStackInSlot(it) ?: return@any false
+            return@any ItemUtil.getDisplayName(hotbarItem).contains("Ancestral Spade")
+        }
+        if (player == null || !Skytils.config.showGriffinBurrows || LocationState.serverType != ServerTypes.Hub) return
         if (!burrowRefreshTimer.isStarted) burrowRefreshTimer.start()
         if ((burrowRefreshTimer.time >= 60_000L || shouldRefreshBurrows)) {
             burrowRefreshTimer.reset()
             shouldRefreshBurrows = false
-            for (i in 0..7) {
-                val hotbarItem = player.inventory.getStackInSlot(i) ?: continue
-                if (hotbarItem.displayName.contains("Ancestral Spade")) {
-                    player.addChatMessage(ChatComponentText(EnumChatFormatting.GREEN.toString() + "Looking for burrows..."))
-                    refreshBurrows()
-                    break
-                }
+            if (hasSpadeInHotbar) {
+                player.addChatMessage(ChatComponentText(EnumChatFormatting.GREEN.toString() + "Looking for burrows..."))
+                refreshBurrows()
             }
         }
     }
@@ -174,7 +176,7 @@ class GriffinBurrows {
         val item = mc.thePlayer.heldItem
         if (Utils.inSkyblock) {
             if (Skytils.config.showGriffinBurrows && item != null) {
-                if (item.displayName.contains("Ancestral Spade") && blockState.block === Blocks.grass) {
+                if (ItemUtil.getDisplayName(item).contains("Ancestral Spade") && blockState.block === Blocks.grass) {
                     if (burrows.any { burrow: Burrow -> burrow.blockPos == event.pos }) {
                         lastDugBurrow = event.pos
                     }
@@ -194,7 +196,7 @@ class GriffinBurrows {
         val item = mc.thePlayer.heldItem
         if (Utils.inSkyblock) {
             if (Skytils.config.showGriffinBurrows && item != null) {
-                if (item.displayName.contains("Ancestral Spade") && blockState.block === Blocks.grass) {
+                if (ItemUtil.getDisplayName(item).contains("Ancestral Spade") && blockState.block === Blocks.grass) {
                     if (burrows.any { burrow: Burrow -> burrow.blockPos == event.pos }) {
                         lastDugBurrow = event.pos
                     }
@@ -237,25 +239,19 @@ class GriffinBurrows {
         override fun render() {
             if (LocationState.serverType != ServerTypes.Hub) return
             val player = mc.thePlayer
-            if (toggled && Utils.inSkyblock && player != null) {
-                for (i in 0..7) {
-                    val hotbarItem = player.inventory.getStackInSlot(i) ?: continue
-                    if (hotbarItem.displayName.contains("Ancestral Spade")) {
-                        val diff = ((60_000L - burrowRefreshTimer.time) / 1000L).toFloat().roundToInt().toLong()
-                        val sr = ScaledResolution(Minecraft.getMinecraft())
-                        val leftAlign = actualX < sr.scaledWidth / 2f
-                        val alignment = if (leftAlign) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
-                        ScreenRenderer.fontRenderer.drawString(
-                            "Time until refresh: " + diff + "s",
-                            if (leftAlign) 0f else actualWidth,
-                            0f,
-                            CommonColors.WHITE,
-                            alignment,
-                            SmartFontRenderer.TextShadow.NORMAL
-                        )
-                        break
-                    }
-                }
+            if (toggled && Utils.inSkyblock && player != null && hasSpadeInHotbar) {
+                val diff = ((60_000L - burrowRefreshTimer.time) / 1000L).toFloat().roundToInt().toLong()
+                val sr = ScaledResolution(Minecraft.getMinecraft())
+                val leftAlign = actualX < sr.scaledWidth / 2f
+                val alignment = if (leftAlign) TextAlignment.LEFT_RIGHT else TextAlignment.RIGHT_LEFT
+                ScreenRenderer.fontRenderer.drawString(
+                    "Time until refresh: " + diff + "s",
+                    if (leftAlign) 0f else actualWidth,
+                    0f,
+                    CommonColors.WHITE,
+                    alignment,
+                    SmartFontRenderer.TextShadow.NORMAL
+                )
             }
         }
 

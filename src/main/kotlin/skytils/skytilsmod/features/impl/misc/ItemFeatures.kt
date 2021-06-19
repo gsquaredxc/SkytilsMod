@@ -95,7 +95,7 @@ class ItemFeatures {
                         if (stack.displayName.contains("Health Potion")) event.slot highlight Color(255, 225, 30)
                         else if (stack.displayName.containsAny(
                                 "Defuse Kit", "Lever", "Torch",
-                                "Stone", "Tripwire Hook", "Journal Entry",
+                                "Stone Button", "Tripwire Hook", "Journal Entry",
                                 "Training Weights", "Mimic Fragment"
                             )
                         ) event.slot highlight Color(255, 50, 150, 255) else {
@@ -236,7 +236,7 @@ class ItemFeatures {
         }
         if (Skytils.config.showRadioactiveBonus && itemId == "TARANTULA_HELMET") {
             val bonus = try {
-                (TabListUtils.tabEntries[68].getText().substringAfter("❁").removeSuffix("§r").toInt()
+                (TabListUtils.tabEntries[68].text.substringAfter("❁").removeSuffix("§r").toInt()
                     .coerceAtMost(1000) / 10).toString()
             } catch (e: Exception) {
                 "Error"
