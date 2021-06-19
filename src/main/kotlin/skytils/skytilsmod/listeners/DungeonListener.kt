@@ -32,10 +32,6 @@ import skytils.skytilsmod.features.impl.dungeons.DungeonTimer
 import skytils.skytilsmod.features.impl.handlers.CooldownTracker
 import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.NumberUtil.addSuffix
-import skytils.skytilsmod.utils.TabListUtils
-import skytils.skytilsmod.utils.Utils
-import skytils.skytilsmod.utils.getText
-import skytils.skytilsmod.utils.stripControlCodes
 import skytils.skytilsmod.utils.NumberUtil.romanToDecimal
 
 object DungeonListener {
