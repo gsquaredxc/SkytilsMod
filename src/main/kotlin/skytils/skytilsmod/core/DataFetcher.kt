@@ -134,7 +134,7 @@ object DataFetcher {
 
     init {
         reloadData()
-        fixedRateTimer(name = "Skytils-Reload-Data", period = 60 * 60 * 1000) {
+        fixedRateTimer(name = "Skytils-Reload-Data", period = 3600000) { /*60 * 60 * 1000*/
             reloadData()
         }
     }

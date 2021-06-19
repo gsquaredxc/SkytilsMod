@@ -260,7 +260,7 @@ class ItemFeatures {
                 if (packet.particleType == EnumParticleTypes.EXPLOSION_LARGE && Skytils.config.hideImplosionParticles) {
                     if (packet.isLongDistance && packet.particleCount == 8 && packet.particleSpeed == 8f && packet.xOffset == 0f && packet.yOffset == 0f && packet.zOffset == 0f) {
                         for (player in mc.theWorld.playerEntities) {
-                            if (Vec3(packet.xCoordinate, packet.yCoordinate, packet.zCoordinate).squareDistanceTo(Vec3(player.posX, player.posY, player.posZ)) <= 11 * 11) {
+                            if (Vec3(packet.xCoordinate, packet.yCoordinate, packet.zCoordinate).squareDistanceTo(Vec3(player.posX, player.posY, player.posZ)) <= 121 /*11^2*/) {
                                 val item = player.heldItem
                                 if (item != null) {
                                     val itemName = getDisplayName(item).stripControlCodes()

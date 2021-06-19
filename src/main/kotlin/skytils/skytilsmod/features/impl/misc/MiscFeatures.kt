@@ -174,7 +174,7 @@ class MiscFeatures {
                 val headSlot = entity.getCurrentArmor(3)
                 if (Skytils.config.trickOrTreatChestAlert && headSlot != null && headSlot.item === Items.skull && headSlot.hasTagCompound() && entity.getDistanceSqToEntity(
                         mc.thePlayer
-                    ) < 10 * 10
+                    ) < 100 /*10^2*/
                 ) {
                     if (headSlot.tagCompound.getCompoundTag("SkullOwner")
                             .getString("Id") == "f955b4ac-0c41-3e45-8703-016c46a8028e"
@@ -377,7 +377,7 @@ class MiscFeatures {
                 val players = mc.theWorld.getPlayers<EntityPlayer>(
                     EntityOtherPlayerMP::class.java
                 ) { p: EntityPlayer? ->
-                    p!!.getDistanceSqToEntity(player) <= 30 * 30 && p.uniqueID.version() != 2 && p !== player && isInTablist(
+                    p!!.getDistanceSqToEntity(player) <= 900 /*30^2*/ && p.uniqueID.version() != 2 && p !== player && isInTablist(
                         p
                     )
                 }

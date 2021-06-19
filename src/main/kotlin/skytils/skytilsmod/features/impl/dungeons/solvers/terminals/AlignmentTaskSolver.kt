@@ -64,7 +64,7 @@ class AlignmentTaskSolver {
         if (mc.thePlayer == null || mc.theWorld == null || event.phase != TickEvent.Phase.START) return
         if (!Skytils.config.alignmentTerminalSolver || !Utils.inDungeons || DungeonFeatures.dungeonFloor != "F7" || DungeonTimer.phase2ClearTime == -1L || DungeonTimer.phase3ClearTime != -1L) return
         if (ticks % 20 == 0) {
-            if (mc.thePlayer.getDistanceSqToCenter(topLeft) <= 25 * 25) {
+            if (mc.thePlayer.getDistanceSqToCenter(topLeft) <= 625) { /*25^2*/
                 if (grid.size < 25) {
                     val frames = mc.theWorld.getEntities(EntityItemFrame::class.java) {
                         it != null && box.contains(it.position) && it.displayedItem != null && Utils.equalsOneOf(

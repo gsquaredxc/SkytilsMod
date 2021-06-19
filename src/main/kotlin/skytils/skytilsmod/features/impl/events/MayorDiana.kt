@@ -52,7 +52,7 @@ class MayorDiana {
             if (packet.volume == 0.8f && packet.soundName == "random.anvil_land") {
                 val pos = BlockPos(packet.x, packet.y, packet.z)
                 val golem = (mc.theWorld.loadedEntityList.filter {
-                    it is EntityIronGolem && it.health > 0 && it.getDistanceSq(pos) <= 25 * 25
+                    it is EntityIronGolem && it.health > 0 && it.getDistanceSq(pos) <= 625 /*25^2*/
                 }.minByOrNull { it.getDistanceSq(pos) } ?: return) as EntityIronGolem
                 gaiaConstructHits.compute(golem) { _: EntityIronGolem, i: Int? -> (i ?: 0) + 1 }
             }
