@@ -41,6 +41,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.network.play.server.S29PacketSoundEffect
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
+import net.minecraft.util.ChatComponentText
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderBlockOverlayEvent
@@ -51,6 +52,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.core.GuiManager.Companion.createTitle
+import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.BossBarEvent
@@ -58,6 +60,7 @@ import skytils.skytilsmod.events.CheckRenderEntityEvent
 import skytils.skytilsmod.events.GuiContainerEvent
 import skytils.skytilsmod.events.GuiContainerEvent.SlotClickEvent
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
+import skytils.skytilsmod.events.SendChatMessageEvent
 import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.ItemUtil.getExtraAttributes
 import skytils.skytilsmod.utils.ItemUtil.getSkyBlockItemID
@@ -74,6 +77,19 @@ import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import java.awt.Color
 
 class MiscFeatures {
+
+    private var lastGLeaveCommand = 0L
+
+    @SubscribeEvent
+    fun onSendChatMessage(event: SendChatMessageEvent) {
+        if (!event.message.startsWith("/g leave") || !Utils.isOnHypixel) return
+        if (System.currentTimeMillis() - lastGLeaveCommand >= 10_000) {
+            event.isCanceled = true
+            lastGLeaveCommand = System.currentTimeMillis()
+            mc.ingameGUI.chatGUI.printChatMessage(ChatComponentText("§cSkytils stopped you from using leaving your guild! §6Run the command again if you wish to leave!"))
+        }
+    }
+
     @SubscribeEvent
     fun onBossBarSet(event: BossBarEvent.Set) {
         val displayData = event.displayData
@@ -153,16 +169,18 @@ class MiscFeatures {
     fun onJoin(event: EntityJoinWorldEvent) {
         if (!Utils.inSkyblock || mc.thePlayer == null || mc.theWorld == null) return
         if (event.entity is EntityArmorStand) {
-            val entity = event.entity as EntityArmorStand
-            val headSlot = entity.getCurrentArmor(3)
-            if (Skytils.config.trickOrTreatChestAlert && headSlot != null && headSlot.item === Items.skull && headSlot.hasTagCompound() && entity.getDistanceSqToEntity(
-                    mc.thePlayer
-                ) < 10 * 10
-            ) {
-                if (headSlot.tagCompound.getCompoundTag("SkullOwner")
-                        .getString("Id") == "f955b4ac-0c41-3e45-8703-016c46a8028e"
+            TickTask(5) {
+                val entity = event.entity as EntityArmorStand
+                val headSlot = entity.getCurrentArmor(3)
+                if (Skytils.config.trickOrTreatChestAlert && headSlot != null && headSlot.item === Items.skull && headSlot.hasTagCompound() && entity.getDistanceSqToEntity(
+                        mc.thePlayer
+                    ) < 10 * 10
                 ) {
-                    createTitle("§cTrick or Treat!", 60)
+                    if (headSlot.tagCompound.getCompoundTag("SkullOwner")
+                            .getString("Id") == "f955b4ac-0c41-3e45-8703-016c46a8028e"
+                    ) {
+                        createTitle("§cTrick or Treat!", 60)
+                    }
                 }
             }
         }
@@ -359,7 +377,7 @@ class MiscFeatures {
                 val players = mc.theWorld.getPlayers<EntityPlayer>(
                     EntityOtherPlayerMP::class.java
                 ) { p: EntityPlayer? ->
-                    p!!.getDistanceToEntity(player) <= 30 && p.uniqueID.version() != 2 && p !== player && isInTablist(
+                    p!!.getDistanceSqToEntity(player) <= 30 * 30 && p.uniqueID.version() != 2 && p !== player && isInTablist(
                         p
                     )
                 }

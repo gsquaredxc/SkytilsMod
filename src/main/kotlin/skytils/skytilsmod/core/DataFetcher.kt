@@ -51,6 +51,10 @@ object DataFetcher {
             for ((key, value) in levelingData.get("dungeoneering_xp").asJsonObject.entrySet()) {
                 SkillUtils.dungeoneeringXp[key.toInt()] = value.asLong
             }
+            for ((key, value) in levelingData.get("slayer_xp").asJsonObject.entrySet()) {
+                SkillUtils.slayerXp[key] =
+                    value.asJsonObject.entrySet().associateTo(LinkedHashMap()) { it.key.toInt() to it.value.asLong }
+            }
             val mayorData = APIUtil.getArrayResponse("${dataUrl}constants/mayors.json")
             for (m in mayorData) {
                 val mayorObj = m.asJsonObject
@@ -105,7 +109,8 @@ object DataFetcher {
         MayorInfo.mayorData.clear()
         MiningFeatures.fetchurItems.clear()
         RelicWaypoints.relicLocations.clear()
-        SkillUtils.dungeoneeringXp.clone()
+        SkillUtils.dungeoneeringXp.clear()
+        SkillUtils.slayerXp.clear()
         ThreeWeirdosSolver.solutions.clear()
         TriviaSolver.triviaSolutions.clear()
         SlayerFeatures.BossHealths.clear()
