@@ -2015,9 +2015,9 @@ class Config : Vigilant(File("./config/skytils/config.toml"), "Skytils", sorting
             Skytils.startsWithSequenceSolver, TickStartEvent::class.java,StateRegisters.inDungeons,::startsWithSequenceTerminalSolver,
             startsWithSequenceTerminalSolver,"STOnTickSeqSolver")
         //events
-        ConfigUtil.connectConfigToState(this,"onTick",
+        ConfigUtil.connectConfigToState(this,"onTickShow",
             Skytils.griffinBurrows, TickStartEvent::class.java, StateRegisters.inSkyblock,
-            ::showGriffinBurrows, showGriffinBurrows, "STOnTickGriffinBurrow")
+            ::showGriffinBurrows, showGriffinBurrows, "STOnTickGriffinBurrowShow")
         ConfigUtil.connectConfigToState(this,"onTick",
             Skytils.mayorDiana, TickStartEvent::class.java, StateRegisters.inSkyblock,
             ::trackGaiaHits, trackGaiaHits, "STOnTickDiana")

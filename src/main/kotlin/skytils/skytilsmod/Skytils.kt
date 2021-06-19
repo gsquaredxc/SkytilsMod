@@ -261,6 +261,7 @@ class Skytils {
 
         //registering these methods with the state so they dont get out of line
         ConfigUtil.registerWithState("onTickSB",dungeonFeatures,TickStartEvent::class.java,StateRegisters.inDungeons,"STDungeonOnTickSB")
+        ConfigUtil.registerWithState("onTick", griffinBurrows, TickStartEvent::class.java, StateRegisters.inSkyblock, "STOnTickGriffinBurrow")
     }
 
     @Mod.EventHandler

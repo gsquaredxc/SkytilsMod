@@ -131,7 +131,11 @@ class GriffinBurrows {
             val hotbarItem = player.inventory.getStackInSlot(it) ?: return@any false
             return@any ItemUtil.getDisplayName(hotbarItem).contains("Ancestral Spade")
         }
-        if (player == null || !Skytils.config.showGriffinBurrows || LocationState.serverType != ServerTypes.Hub) return
+    }
+    @EventListener(id = "STOnTickGriffinBurrowShow")
+    fun onTickShow(event: TickStartEvent) {
+        val player = mc.thePlayer
+        if (player == null || LocationState.serverType != ServerTypes.Hub) return
         if (!burrowRefreshTimer.isStarted) burrowRefreshTimer.start()
         if ((burrowRefreshTimer.time >= 60_000L || shouldRefreshBurrows)) {
             burrowRefreshTimer.reset()
