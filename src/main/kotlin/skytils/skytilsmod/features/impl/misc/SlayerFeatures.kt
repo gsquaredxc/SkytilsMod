@@ -18,6 +18,8 @@
 package skytils.skytilsmod.features.impl.misc
 
 import com.google.gson.JsonObject
+import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
+import com.gsquaredxc.hyskyAPI.state.location.ServerTypes
 import net.minecraft.block.*
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
@@ -352,10 +354,10 @@ class SlayerFeatures {
     @SubscribeEvent
     fun onCheckRender(event: CheckRenderEntityEvent<*>) {
         // TODO force someone to test this
-        if (!Skytils.config.hideOthersBrokenHeartRadiation || event.entity !is EntityGuardian || SBInfo.SkyblockIsland.TheEnd.mode != SBInfo.mode) return
+        if (!Skytils.config.hideOthersBrokenHeartRadiation || event.entity !is EntityGuardian || LocationState.serverType != ServerTypes.TheEnd) return
         if (slayerEntity != null) {
             if (slayerEntity!!.isRiding) {
-                if (event.entity.getDistanceSqToEntity(slayerEntity!!) > 2 * 2) event.isCanceled = true
+                if (event.entity.getDistanceSqToEntity(slayerEntity!!) > 4 /*2^2*/) event.isCanceled = true
             } else {
                 event.isCanceled = true
             }
