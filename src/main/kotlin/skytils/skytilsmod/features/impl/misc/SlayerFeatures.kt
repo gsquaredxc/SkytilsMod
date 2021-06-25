@@ -29,6 +29,7 @@ import net.minecraft.entity.boss.BossStatus
 import net.minecraft.entity.boss.IBossDisplayData
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityEnderman
+import net.minecraft.entity.monster.EntityGuardian
 import net.minecraft.entity.monster.EntitySpider
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.entity.passive.EntityWolf
@@ -45,6 +46,7 @@ import net.minecraft.util.IChatComponent
 import net.minecraftforge.client.event.RenderLivingEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
+import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
@@ -55,6 +57,7 @@ import skytils.skytilsmod.core.TickTask
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.BlockChangeEvent
+import skytils.skytilsmod.events.CheckRenderEntityEvent
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.NumberUtil.roundToPrecision
@@ -339,6 +342,26 @@ class SlayerFeatures {
         processSlayerEntity(event.entity)
     }
 
+    @SubscribeEvent
+    fun onWorldLoad(event: WorldEvent.Load) {
+        slayerEntity = null
+        slayerNameEntity = null
+        slayerTimerEntity = null
+    }
+
+    @SubscribeEvent
+    fun onCheckRender(event: CheckRenderEntityEvent<*>) {
+        // TODO force someone to test this
+        if (!Skytils.config.hideOthersBrokenHeartRadiation || event.entity !is EntityGuardian || SBInfo.SkyblockIsland.TheEnd.mode != SBInfo.mode) return
+        if (slayerEntity != null) {
+            if (slayerEntity!!.isRiding) {
+                if (event.entity.getDistanceSqToEntity(slayerEntity!!) > 2 * 2) event.isCanceled = true
+            } else {
+                event.isCanceled = true
+            }
+        }
+    }
+
     private class RNGMeter(val max: Float, val current: Float, val name: IChatComponent) : IBossDisplayData {
 
         override fun getMaxHealth(): Float {
@@ -604,19 +627,25 @@ class SlayerFeatures {
                     if (armors.isNotEmpty()) {
                         val leftAlign = actualX < ScaledResolution(SlayerFeatures.mc).scaledWidth / 2f
                         if (!leftAlign) {
-                            val longest = armors.maxByOrNull { it.second.length } ?: null to ""
-                            GlStateManager.translate(
-                                (-fontRenderer.getStringWidth(longest.second)).toDouble(), 0.0,
-                                0.0
-                            )
-                        }
-                        armors.forEachIndexed { index, pair ->
-                            RenderUtil.renderItem(pair.first, 0, index * 16)
-                            fontRenderer.drawString(
-                                pair.second,
-                                18f,
-                                index * 16 + 4.5f
-                            )
+                            val longest = fontRenderer.getStringWidth((armors.maxByOrNull { it.second.length }
+                                ?: null to "").second)
+                            armors.forEachIndexed { index, pair ->
+                                RenderUtil.renderItem(pair.first, longest + 2, index * 16)
+                                fontRenderer.drawString(
+                                    pair.second,
+                                    longest - fontRenderer.getStringWidth(pair.second).toFloat(),
+                                    index * 16 + 4.5f
+                                )
+                            }
+                        } else {
+                            armors.forEachIndexed { index, pair ->
+                                RenderUtil.renderItem(pair.first, 0, index * 16)
+                                fontRenderer.drawString(
+                                    pair.second,
+                                    18f,
+                                    index * 16 + 4.5f
+                                )
+                            }
                         }
                     }
                 }
@@ -626,18 +655,25 @@ class SlayerFeatures {
         override fun demoRender() {
             val leftAlign = actualX < ScaledResolution(mc).scaledWidth / 2f
             val text = "§e99.9% §b(§f199§b)"
-            if (!leftAlign) {
-                GlStateManager.translate(
-                    (-ScreenRenderer.fontRenderer.getStringWidth(text)).toDouble(), 0.0,
-                    0.0
+            if (leftAlign) {
+                RenderUtil.renderItem(ItemStack(Items.leather_chestplate), 0, 0)
+                ScreenRenderer.fontRenderer.drawString(
+                    text,
+                    18f,
+                    4.5f
+                )
+            } else {
+                ScreenRenderer.fontRenderer.drawString(
+                    text,
+                    0f,
+                    4.5f
+                )
+                RenderUtil.renderItem(
+                    ItemStack(Items.leather_chestplate),
+                    ScreenRenderer.fontRenderer.getStringWidth(text) + 2,
+                    0
                 )
             }
-            RenderUtil.renderItem(ItemStack(Items.leather_chestplate), 0, 0)
-            ScreenRenderer.fontRenderer.drawString(
-                text,
-                18f,
-                4.5f
-            )
         }
 
         override val height: Int

@@ -43,7 +43,6 @@ class StarredItemStrategy : ItemProtectStrategy() {
         return false
     }
 
-    override fun toggled(): Boolean {
-        return Skytils.config.protectStarredItems
-    }
+    override val isToggled: Boolean
+        get() = Skytils.config.protectStarredItems
 }
