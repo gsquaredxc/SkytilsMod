@@ -23,11 +23,13 @@ import gg.essential.elementa.components.ScrollComponent
 import gg.essential.elementa.components.UIContainer
 import gg.essential.elementa.components.UIText
 import gg.essential.elementa.components.input.UITextInput
-import gg.essential.elementa.constraints.*
+import gg.essential.elementa.constraints.CenterConstraint
+import gg.essential.elementa.constraints.ChildBasedSizeConstraint
+import gg.essential.elementa.constraints.RelativeConstraint
+import gg.essential.elementa.constraints.SiblingConstraint
 import gg.essential.elementa.dsl.*
 import gg.essential.elementa.effects.OutlineEffect
 import gg.essential.elementa.effects.RecursiveFadeEffect
-import gg.essential.elementa.utils.sizeStringToWidth
 import gg.essential.universal.UGraphics
 import gg.essential.vigilance.gui.settings.CheckboxComponent
 import gg.essential.vigilance.utils.onLeftClick
@@ -180,7 +182,7 @@ class SpiritLeapNamesGui : WindowScreen(newGuiScale = 2) {
             val button =
                 container.childrenOfType<SimpleButton>().find { it.t != "Remove" }
                     ?: throw IllegalStateException("Button cannot be missing!")
-            val name = text.getText();
+            val name = text.getText()
             if (name.isBlank()) continue
             SpiritLeap.names[name] = button.text.getText() == "Enabled"
         }

@@ -23,7 +23,6 @@ import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.PersistentSave
 import skytils.skytilsmod.utils.ItemUtil
 import skytils.skytilsmod.utils.Utils

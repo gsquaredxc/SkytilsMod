@@ -30,7 +30,6 @@ import net.minecraft.util.EnumParticleTypes
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.core.DataFetcher
 import skytils.skytilsmod.core.PersistentSave
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.events.PacketEvent.SendEvent

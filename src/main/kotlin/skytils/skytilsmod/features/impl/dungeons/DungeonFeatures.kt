@@ -24,7 +24,6 @@ import com.gsquaredxc.hyskyAPI.state.PlayerStates.LocationState
 import net.minecraft.block.BlockStainedGlass
 import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.EntityOtherPlayerMP
-import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -37,10 +36,7 @@ import net.minecraft.entity.passive.EntityBat
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
-import net.minecraft.init.Blocks
-import net.minecraft.init.Items
 import net.minecraft.inventory.ContainerChest
-import net.minecraft.item.Item
 import net.minecraft.network.play.server.S29PacketSoundEffect
 import net.minecraft.potion.Potion
 import net.minecraft.util.AxisAlignedBB
@@ -61,11 +57,9 @@ import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
 import skytils.skytilsmod.events.BossBarEvent
-import skytils.skytilsmod.events.GuiContainerEvent
 import skytils.skytilsmod.events.GuiContainerEvent.SlotClickEvent
 import skytils.skytilsmod.events.PacketEvent.ReceiveEvent
 import skytils.skytilsmod.events.SendChatMessageEvent
-import skytils.skytilsmod.listeners.DungeonListener
 import skytils.skytilsmod.utils.*
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer

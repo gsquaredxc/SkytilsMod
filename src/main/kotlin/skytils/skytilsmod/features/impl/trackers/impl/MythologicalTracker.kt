@@ -30,7 +30,6 @@ import net.minecraft.util.ChatComponentText
 import net.minecraftforge.event.entity.EntityJoinWorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.core.PersistentSave
 import skytils.skytilsmod.core.SoundQueue
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
@@ -38,12 +37,12 @@ import skytils.skytilsmod.events.PacketEvent
 import skytils.skytilsmod.features.impl.events.GriffinBurrows
 import skytils.skytilsmod.features.impl.handlers.AuctionData
 import skytils.skytilsmod.features.impl.trackers.Tracker
-import skytils.skytilsmod.utils.*
+import skytils.skytilsmod.utils.ItemRarity
+import skytils.skytilsmod.utils.ItemUtil
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import skytils.skytilsmod.utils.stripControlCodes
-import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import java.time.ZoneId

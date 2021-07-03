@@ -22,10 +22,8 @@ import com.google.gson.JsonObject
 import net.minecraft.item.ItemStack
 import skytils.skytilsmod.Skytils
 import skytils.skytilsmod.core.Config
-import skytils.skytilsmod.features.impl.handlers.AuctionData.Companion.lowestBINs
 import skytils.skytilsmod.utils.APIUtil
 import skytils.skytilsmod.utils.ItemUtil
-import java.util.function.Consumer
 import kotlin.concurrent.fixedRateTimer
 import kotlin.reflect.jvm.javaField
 

@@ -352,7 +352,7 @@ class SlayerFeatures {
     }
 
     @SubscribeEvent
-    fun onCheckRender(event: CheckRenderEntityEvent<*>) {
+    fun onCheckRender(event: CheckRenderEntityEvent<EntityGuardian>) {
         // TODO force someone to test this
         if (!Skytils.config.hideOthersBrokenHeartRadiation || event.entity !is EntityGuardian || LocationState.serverType != ServerTypes.TheEnd || !event.entity.isInvisible) return
         if (slayerEntity != null && slayerEntity is EntityEnderman) {
