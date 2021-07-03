@@ -73,7 +73,7 @@ object ScoreCalculation {
                 if (!rooms.containsKey(room)) {
                     val secrets = room.substringAfterLast("-").toIntOrNull() ?: 0
                     rooms[room] = secrets
-                    if (Skytils.config.scoreCalculationAssist) {
+                    if (Skytils.config.scoreCalculationAssist && false) {
                         SAFE_MESSAGE_SENDER.queueMessage("/pc \$SKYTILS-DUNGEON-SCORE-ROOM$: [$room] ($secrets)")
                     }
                 }

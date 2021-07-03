@@ -166,7 +166,7 @@ class SpamHider {
                         "You should have listened"
                     ) && !unformatted.contains("Yikes") && !unformatted.contains("chose the wrong answer") && !unformatted.contains(
                         "thinks the answer is"
-                    ) && !(unformatted.contains("answered Question #") && unformatted.endsWith("correctly!")) -> {
+                    ) && !((unformatted.contains("answered Question #") || unformatted.contains("answered the final question")) && unformatted.endsWith("correctly!")) -> {
                         cancelChatPacket(event, false)
                     }
                 }
@@ -238,7 +238,7 @@ class SpamHider {
                 // Mining Abilities
                 formatted.startsWith("§r§6") && formatted.endsWith("§r§ais now available!§r") -> {
                     when (Skytils.config.miningAbilityHider) {
-                        1,2 -> cancelChatPacket(event, Skytils.config.miningAbilityHider == 2)
+                        1, 2 -> cancelChatPacket(event, Skytils.config.miningAbilityHider == 2)
                     }
                 }
 

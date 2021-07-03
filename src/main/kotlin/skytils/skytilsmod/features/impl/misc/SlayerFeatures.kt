@@ -354,11 +354,16 @@ class SlayerFeatures {
     @SubscribeEvent
     fun onCheckRender(event: CheckRenderEntityEvent<*>) {
         // TODO force someone to test this
-        if (!Skytils.config.hideOthersBrokenHeartRadiation || event.entity !is EntityGuardian || LocationState.serverType != ServerTypes.TheEnd) return
-        if (slayerEntity != null) {
+        if (!Skytils.config.hideOthersBrokenHeartRadiation || event.entity !is EntityGuardian || LocationState.serverType != ServerTypes.TheEnd || !event.entity.isInvisible) return
+        if (slayerEntity != null && slayerEntity is EntityEnderman) {
             if (slayerEntity!!.isRiding) {
-                if (event.entity.getDistanceSqToEntity(slayerEntity!!) > 4 /*2^2*/) event.isCanceled = true
+                printDebugMessage("Slayer is Riding")
+                if (event.entity.getDistanceSqToEntity(slayerEntity!!) > 4 /*2^2*/) {
+                    printDebugMessage("Guardian too far")
+                    event.isCanceled = true
+                }
             } else {
+                printDebugMessage("Slayer not riding, removing guardian")
                 event.isCanceled = true
             }
         }
@@ -772,7 +777,7 @@ class SlayerFeatures {
 
         private fun detectSlayerEntities(entity: EntityLiving, name: String, timer: String, nameStart: String) {
             TickTask(5) {
-                val nearbyArmorStands = entity.getEntityWorld().getEntitiesInAABBexcluding(
+                val nearbyArmorStands = entity.entityWorld.getEntitiesInAABBexcluding(
                     entity, entity.entityBoundingBox.expand(0.2, 3.0, 0.2)
                 ) { nearbyEntity: Entity? ->
                     if (nearbyEntity is EntityArmorStand) {

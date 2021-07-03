@@ -25,19 +25,18 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import skytils.skytilsmod.Skytils
-import skytils.skytilsmod.core.PersistentSave
 import skytils.skytilsmod.core.structure.FloatPair
 import skytils.skytilsmod.core.structure.GuiElement
+import skytils.skytilsmod.features.impl.trackers.Tracker
 import skytils.skytilsmod.utils.Utils
 import skytils.skytilsmod.utils.graphics.ScreenRenderer
 import skytils.skytilsmod.utils.graphics.SmartFontRenderer
 import skytils.skytilsmod.utils.graphics.colors.CommonColors
 import skytils.skytilsmod.utils.stripControlCodes
-import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
-object MayorJerryTracker : PersistentSave(File(File(Skytils.modDir, "trackers"), "mayorjerry.json")) {
+object MayorJerryTracker : Tracker("mayorjerry") {
 
     @Suppress("UNUSED")
     enum class HiddenJerry(val type: String, val colorCode: String, var discoveredTimes: Long = 0L) {
@@ -80,6 +79,7 @@ object MayorJerryTracker : PersistentSave(File(File(Skytils.modDir, "trackers"),
     fun onJerry(type: String) {
         if (!Skytils.config.trackHiddenJerry) return
         HiddenJerry.getFromString(type)!!.discoveredTimes++
+        markDirty<MayorJerryTracker>()
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
@@ -91,6 +91,7 @@ object MayorJerryTracker : PersistentSave(File(File(Skytils.modDir, "trackers"),
         if (formatted.startsWith("§r§b ☺ §r§eYou claimed ") && formatted.endsWith("§efrom the Jerry Box!§r")) {
             if (formatted.contains("coins")) {
                 JerryBoxDrops.COINS.droppedAmount += unformatted.replace(Regex("[^0-9]"), "").toLong()
+                markDirty<MayorJerryTracker>()
             } else if (formatted.contains("XP")) {
                 val xpType = with(formatted) {
                     when {
@@ -102,11 +103,13 @@ object MayorJerryTracker : PersistentSave(File(File(Skytils.modDir, "trackers"),
                 }
                 if (xpType != null) {
                     xpType.droppedAmount += unformatted.replace(Regex("[^0-9]"), "").toLong()
+                    markDirty<MayorJerryTracker>()
                 }
             } else {
                 (JerryBoxDrops.values().find {
                     formatted.contains(it.dropName)
                 } ?: return).droppedAmount++
+                markDirty<MayorJerryTracker>()
             }
             return
         }
@@ -114,7 +117,13 @@ object MayorJerryTracker : PersistentSave(File(File(Skytils.modDir, "trackers"),
             (JerryBoxDrops.values().find {
                 formatted.contains(it.dropName)
             } ?: return).droppedAmount++
+            markDirty<MayorJerryTracker>()
         }
+    }
+
+    override fun resetLoot() {
+        HiddenJerry.values().onEach { it.discoveredTimes = 0L }
+        JerryBoxDrops.values().onEach { it.droppedAmount = 0L }
     }
 
     override fun read(reader: FileReader) {

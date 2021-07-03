@@ -27,7 +27,7 @@ import java.io.FileWriter
 import kotlin.concurrent.fixedRateTimer
 import kotlin.reflect.KClass
 
-abstract class PersistentSave(private val saveFile: File, private val interval: Long = 30_000) {
+abstract class PersistentSave(protected val saveFile: File, interval: Long = 30_000) {
 
     var dirty = false
 
@@ -42,6 +42,10 @@ abstract class PersistentSave(private val saveFile: File, private val interval: 
 
     private fun readSave() {
         try {
+            if (!this.saveFile.exists()) {
+                this.saveFile.parentFile.mkdirs()
+                this.saveFile.createNewFile()
+            }
             FileReader(this.saveFile).use { `in` ->
                 read(`in`)
             }
@@ -58,6 +62,10 @@ abstract class PersistentSave(private val saveFile: File, private val interval: 
 
     private fun writeSave() {
         try {
+            if (!this.saveFile.exists()) {
+                this.saveFile.parentFile.mkdirs()
+                this.saveFile.createNewFile()
+            }
             FileWriter(this.saveFile).use { writer ->
                 write(writer)
             }
@@ -75,6 +83,10 @@ abstract class PersistentSave(private val saveFile: File, private val interval: 
                 SAVES.find { it::class == clazz } ?: throw IllegalAccessException("PersistentSave not found")
             save.dirty = true
         }
+
+        inline fun <reified T : PersistentSave> markDirty() {
+            markDirty(T::class)
+        }
     }
 
     init {
@@ -86,7 +98,9 @@ abstract class PersistentSave(private val saveFile: File, private val interval: 
             }
         }
         Runtime.getRuntime().addShutdownHook(Thread({
-            writeSave()
+            if (dirty) {
+                writeSave()
+            }
         }, "${this::class.simpleName}-Save"))
     }
 

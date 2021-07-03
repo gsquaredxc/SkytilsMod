@@ -250,6 +250,7 @@ class Skytils {
         MinecraftForge.EVENT_BUS.register(SimonSaysSolver())
         MinecraftForge.EVENT_BUS.register(SlayerFeatures())
         MinecraftForge.EVENT_BUS.register(SpidersDenFeatures())
+        MinecraftForge.EVENT_BUS.register(SpiritLeap())
         MinecraftForge.EVENT_BUS.register(startsWithSequenceSolver)
         MinecraftForge.EVENT_BUS.register(TankDisplayStuff())
         MinecraftForge.EVENT_BUS.register(TechnoMayor())
@@ -314,6 +315,7 @@ class Skytils {
             }
         } else throw RuntimeException("Skytils was unable to mixin to the CommandHandler. Please report this on our Discord at discord.gg/skytils.")
 
+        DataFetcher.reloadData()
         MayorInfo.fetchMayorData()
     }
 

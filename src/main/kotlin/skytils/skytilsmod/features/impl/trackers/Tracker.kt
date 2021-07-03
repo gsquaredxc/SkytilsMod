@@ -16,18 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package skytils.skytilsmod.mixins.forge;
+package skytils.skytilsmod.features.impl.trackers;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.SplashProgress;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import skytils.skytilsmod.Skytils
+import skytils.skytilsmod.core.PersistentSave
+import java.io.File
 
-@Mixin(value = SplashProgress.class, priority = 999)
-public abstract class MixinSplashProgress {
-    @ModifyVariable(method = "start", at = @At(value = "STORE"), ordinal = 2, remap = false)
-    private static ResourceLocation setForgeGif(ResourceLocation resourceLocation) {
-        return new ResourceLocation("skytils", "sychicpet.gif");
+abstract class Tracker(val id: String) : PersistentSave(File(File(Skytils.modDir, "trackers"), "$id.json")) {
+    companion object {
+        val TRACKERS = HashSet<Tracker>()
+
+        fun getTrackerById(id: String): Tracker? {
+            return TRACKERS.find { it.id == id }
+        }
     }
+
+    init {
+        TRACKERS.add(this)
+    }
+
+    fun doReset() {
+        resetLoot()
+        markDirty(this::class)
+    }
+
+    protected abstract fun resetLoot()
 }

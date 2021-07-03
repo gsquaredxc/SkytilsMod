@@ -22,6 +22,7 @@ import kotlinx.coroutines.*
 import net.minecraft.client.entity.EntityPlayerSP
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
+import net.minecraft.command.WrongUsageException
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.util.BlockPos
 import net.minecraft.util.ChatComponentText
@@ -32,9 +33,11 @@ import skytils.skytilsmod.features.impl.events.GriffinBurrows
 import skytils.skytilsmod.features.impl.handlers.MayorInfo
 import skytils.skytilsmod.features.impl.mining.MiningFeatures
 import skytils.skytilsmod.features.impl.misc.SlayerFeatures
+import skytils.skytilsmod.features.impl.trackers.Tracker
 import skytils.skytilsmod.gui.LocationEditGui
 import skytils.skytilsmod.gui.OptionsGui
 import skytils.skytilsmod.gui.commandaliases.CommandAliasesGui
+import skytils.skytilsmod.gui.SpiritLeapNamesGui
 import skytils.skytilsmod.gui.keyshortcuts.KeyShortcutsGui
 import skytils.skytilsmod.utils.APIUtil
 import skytils.skytilsmod.utils.Utils
@@ -109,6 +112,17 @@ object SkytilsCommand : CommandBase() {
                     }
                     else -> player.addChatMessage(ChatComponentText("/skytils griffin <refresh>"))
                 }
+            }
+            "resettracker" -> if (args.size == 1) {
+                throw WrongUsageException("You need to specify one of [${Tracker.TRACKERS.joinToString(", ") { it.id }}]!")
+            } else {
+                (Tracker.getTrackerById(args[1]) ?: throw WrongUsageException(
+                    "Invalid Tracker! You need to specify one of [${
+                        Tracker.TRACKERS.joinToString(
+                            ", "
+                        ) { it.id }
+                    }]!"
+                )).doReset()
             }
             "reload" -> {
                 if (args.size == 1) {
@@ -190,8 +204,12 @@ object SkytilsCommand : CommandBase() {
                     }
                 }
             }
+            "spiritleapnames" -> {
+                Skytils.displayScreen = SpiritLeapNamesGui()
+            }
             "debug" -> {
                 Skytils.config.debugMode = !Skytils.config.debugMode
+                Skytils.config.markDirty()
                 player.addChatComponentMessage(ChatComponentText("§c§lSkytils ➜ §cDebug mode was toggled to: §6${Skytils.config.debugMode}"))
             }
             else -> player.addChatMessage(ChatComponentText("§c§lSkytils ➜ §cThis command doesn't exist!\n §cUse §f/skytils help§c for a full list of commands"))
